@@ -13,6 +13,9 @@ import { ChatService } from './services/chat/chat.service';
 @Injectable()
 @WebSocketGateway({ namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+
+  clients: string[];
+
   @WebSocketServer()
   server: Server;
   
@@ -31,9 +34,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('joinRoom')
-  handleJoinRoom(client: Socket, room: string): void {
-    client.join(room);
-    client.emit('joinedRoom', room);
+  async handleJoinRoom(client: Socket, joinDto: JoinDto) {
+    client.join(joinDto.room);
+    client.emit('joinedRoom', joinDto.room);
   }
 
   @SubscribeMessage('leaveRoom')
