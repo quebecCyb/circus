@@ -16,6 +16,7 @@ import * as cookieParser from 'cookie-parser';
 
 @Module({
   imports: [
+    SessionModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'static'),
       serveRoot: '/static', // Set the route prefix for serving static files
