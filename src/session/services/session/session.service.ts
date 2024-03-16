@@ -35,7 +35,7 @@ export class SessionService {
         const newSession: Session = new Session(name, newPlayer); 
         this.sessions.set(name, newSession);
 
-        this.addPlayer(newSession, newPlayer)
+        this.addPlayer(name, newPlayer)
 
         return newSession;
     }
@@ -44,10 +44,10 @@ export class SessionService {
         let session: Session = this.sessions.get(sessionName);
 
         Object.values(session.players).forEach( (e: Player) => {
-            delete this.playersToSession[e.username]
+            this.playersToSession.delete(e.username)
         })
 
-        delete this.sessions[sessionName]
+        this.sessions.delete(sessionName)
 
         // Notify players
     }
@@ -63,25 +63,30 @@ export class SessionService {
         return this.sessions.get(name);
     }
 
-    addPlayer(session: Session, player: Player): void {
-        console.log('player')
-        if (session.players.values.length >= MAX_PLAYERS) {
+    addPlayer(sessionName: string, player: Player): void {
+        let session = this.sessions.get(sessionName)
+        if (Object.keys(session.players).length >= MAX_PLAYERS) {
             throw new ForbiddenException('Session is full');
         }
 
         if(this.playersToSession.has(player.username)){
+            console.log('Player username delete: ' + player.username)
             let session: Session = this.sessions.get(this.playersToSession.get(player.username))
-            this.deletePlayer(session, player.username)
+            this.deletePlayer(session.name, player.username)
         }
 
-        session.players.set(player.username, player)
+        session.players[player.username] = player
         this.playersToSession.set(player.username, session.name)
+
     }
 
-    deletePlayer(session: Session, username: string): void {
-        delete session.players[username]
+    deletePlayer(sessionName: string, username: string): void {
+        let session: Session = this.sessions.get(sessionName)
+
         if(session.owner === username) {
             this.delete(session.name)
         }
+
+        delete session.players[username]
     }
 }

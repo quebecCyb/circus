@@ -14,6 +14,7 @@ import { SessionModule } from './session/session.module';
 
 import * as cookieParser from 'cookie-parser';
 import { TransformResponseMiddleware } from './middlewares/response.middle';
+import { ChatService } from './chat/services/chat/chat.service';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { TransformResponseMiddleware } from './middlewares/response.middle';
     ApiModule, UsersModule, SessionModule
   ],
   controllers: [AppController],
-  providers: [AppService, ChatGateway, ChatGateway],
+  providers: [AppService, ChatGateway, ChatGateway, ChatService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

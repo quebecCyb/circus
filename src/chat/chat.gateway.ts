@@ -8,14 +8,19 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Inject, Injectable } from "@nestjs/common";
 import { SessionService } from "../session/services/session/session.service";
+import { ChatService } from './services/chat/chat.service';
 
 @Injectable()
 @WebSocketGateway({ namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
-  @Inject()
-  private sessionService: SessionService
+  
+
+  constructor(
+    private sessionService: SessionService,
+    private chatService: ChatService,
+  ) {}
 
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id} in rooms ${client.rooms}`);

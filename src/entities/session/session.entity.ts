@@ -9,19 +9,22 @@ const maxPlayers: number = 4
 const minPlayers: number = 2
 const countOfMemes: number = 30
 
+interface PlayerDictionary {
+  [key: string]: Player;
+}
+
 export class Session {
   // private static chatGateway: ChatGateway = new ChatGateway();
 
   readonly name: string;
   readonly owner: string;
-  readonly players: Map<string, Player>
+  readonly players: PlayerDictionary = {}
   state: SessionState; 
 
 
   constructor(name: string, owner: Player) {
     this.name = name;
 
-    this.players = new Map();
 
     this.owner = owner.username;
     // this.addPlayer(owner)
@@ -43,7 +46,7 @@ export class Session {
   startGame(): void {
     if (SessionState.START === this.state) {
       throw new ForbiddenException('Session is already started');
-    } else if (this.players.values.length < minPlayers) {
+    } else if (Object.values(this.players).length < minPlayers) {
       throw new ForbiddenException('Not enough players');
     }
 
