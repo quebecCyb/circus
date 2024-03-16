@@ -12,6 +12,8 @@ import { UsersModule } from './users/users.module';
 import { ChatGateway } from './chat/chat.gateway';
 import { SessionModule } from './session/session.module';
 
+import * as cookieParser from 'cookie-parser';
+
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -30,7 +32,11 @@ import { SessionModule } from './session/session.module';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
+
+    consumer.apply(cookieParser()).forRoutes('*');
     consumer.apply(FirewallMiddleware).forRoutes('*');
     consumer.apply(UserMiddleware).forRoutes('*');
+
+
   }
 }
