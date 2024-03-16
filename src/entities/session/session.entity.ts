@@ -10,7 +10,7 @@ const minPlayers: number = 2
 const countOfMemes: number = 20
 
 export class Session {
-  private static chatGateway: ChatGateway = new ChatGateway();
+  // private static chatGateway: ChatGateway = new ChatGateway();
 
   readonly name: string;
   readonly owner: string;
@@ -49,7 +49,7 @@ export class Session {
 
     // ChangeState()
     this.state = SessionState.START;
-    Session.chatGateway.startGameInRoom(this.name);
+    // Session.chatGateway.startGameInRoom(this.name);
   }
 
   // vote(): void {
