@@ -3,6 +3,7 @@ import { Player } from 'src/entities/session/player.entity';
 import { Session } from 'src/entities/session/session.entity';
 import { User } from 'src/entities/session/user.entity';
 import { SessionCreateData } from 'src/session/schemas/session.create.dto';
+import { SessionState } from "../../../entities/schemas/session.enum";
 
 type FindOption = {
     page?: number
@@ -88,5 +89,37 @@ export class SessionService {
         }
 
         delete session.players[username]
+    }
+
+    SetNextGameState(sessionName: string): Promise<void> {
+        const currState: SessionState = this.sessions.get(sessionName).state;
+        if (currState === SessionState.START) {
+            this.sessions.get(sessionName).state = SessionState.DELAY;
+            await this.SetNextGameState(currState);
+        } else if (currState === SessionState.TURN) {
+            this.sessions.get(sessionName).state = SessionState.VOTE;
+            await this.iterateStates(currState, 1500);
+        } else if (currState === SessionState.VOTE) {
+            this.sessions.get(sessionName).state = SessionState.DELAY;
+            await this.iterateStates(currState, 1000);
+        } else if (currState === SessionState.DELAY) {
+            this.sessions.get(sessionName).state = SessionState.TURN;
+            await this.iterateStates(currState, 500);
+        } else if (currState === SessionState.FINISH) {
+            return new Promise((resolve): void => {
+                console.log("end")
+                resolve();
+            });
+        }
+    }
+
+    private iterateStates(currState: SessionState ,seconds: number): Promise<void> {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                this.SetNextGameState(currState);
+                console.log(currState)
+                resolve();
+            }, seconds);
+        })
     }
 }
