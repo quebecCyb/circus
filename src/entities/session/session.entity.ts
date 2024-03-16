@@ -1,36 +1,34 @@
 import { Player } from "./player.entity";
-import { SessionStateEnum } from "../schemas/sessionState.enum";
+import { SessionState } from "../schemas/session.enum";
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { Card } from "./card.entity";
 import { WebSocketGateway, WebSocketServer, OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+
+const MAX_PLAYERS = 5;
 
 @Injectable()
-export class SessionService {
-  @WebSocketServer()
-  private server: Server
-  private static readonly finalScore: number = 10
-  private readonly _uniqueName: number
-  private readonly creator: Player
-  private players: Player[]
-  private state: SessionStateEnum
-  private currPlayer: number
+export class Session {
+  private readonly _name: string
+  private readonly owner: string
+
+
+  private players: string[]
+  private state: SessionState
   private cardsOnTable: Card[]
 
-  constructor(uniqueName: number, creator: Player) {
-    this._uniqueName = uniqueName;
-    this.players = [];
-    this.state = SessionStateEnum.WAITING;
-    this.currPlayer = 0;
-    this.creator = creator;
+  constructor(name: string, owner: string) {
+    this._name = name;
+    this.players = [owner];
+    this.state = SessionState.WAIT;
+    this.owner = owner;
   }
 
-  get uniqueName(): number {
-    return this._uniqueName;
+  get name(): number {
+    return this.name;
   }
 
-  addPlayer(player: Player): boolean {
-    if (this.players.length >= 4) {
+  addPlayer(player: string): boolean {
+    if (this.players.length >= MAX_PLAYERS) {
       throw new ForbiddenException('Session is full');
     }
     this.players.push(player);
@@ -38,37 +36,32 @@ export class SessionService {
   }
 
   startGame(): void {
-    if (SessionStateEnum.STARTED === this.state) {
+    if (SessionState.START === this.state) {
       throw new ForbiddenException('Session is already started');
     }
-    this.state = SessionStateEnum.STARTED;
+    this.state = SessionState.START;
   }
 
-  vote(): void {
-    if (SessionStateEnum.WAITING === this.state) {
+  changeState(newState: SessionState): void {
+    if (SessionState.WAIT === this.state) {
       throw new ForbiddenException('Session is already voting');
     }
-    this.state = SessionStateEnum.WAITING;
+    this.state = SessionState.WAIT;
   }
 
-  nextPlayer(): string {
-    this.currPlayer = (this.currPlayer + 1) % this.players.length;
-    return this.players[this.currPlayer].username;
-  }
+  // addPoint(player: Player): void {
+  //   player.incrementScore();
+  //   if (player.totalScore === SessionService.finalScore) {
+  //     this.state = SessionStateEnum.FINISHED;
+  //     // TODO: send message to all players
+  //   }
+  // }
 
-  addPoint(player: Player): void {
-    player.incrementScore();
-    if (player.totalScore === SessionService.finalScore) {
-      this.state = SessionStateEnum.FINISHED;
-      // TODO: send message to all players
-    }
-  }
-
-  playCard(player: Player, card: Card): void {
-    player.removeCard(card);
-    this.cardsOnTable.push(card);
-    // this.server.adapter().rooms.
-  }
+  // playCard(player: Player, card: Card): void {
+  //   player.removeCard(card);
+  //   this.cardsOnTable.push(card);
+  //   // this.server.adapter().rooms.
+  // }
 
 
 }
