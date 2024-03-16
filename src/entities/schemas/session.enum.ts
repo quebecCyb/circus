@@ -1,7 +1,8 @@
 export enum SessionState {
   WAIT = 'WAIT',
   START = 'START',
-  MOVE = 'MOVE',
+  TURN = 'TURN',
+  DELAY = 'DELAY',
   VOTE = 'VOTE',
   FINISH = 'FINISH',
 }

@@ -3,12 +3,16 @@ import { Player } from 'src/entities/session/player.entity';
 import { Session } from 'src/entities/session/session.entity';
 import { User } from 'src/entities/session/user.entity';
 import { SessionCreateData } from 'src/session/schemas/session.create.dto';
+import { SessionState } from "../../../entities/schemas/session.enum";
 
 type FindOption = {
     page?: number
 }
 
 const MAX_PLAYERS = 5;
+const VOTE_TIME = 15000;
+const TURN_TIME = 10000;
+const DELAY_TIME = 5000;
 
 @Injectable()
 export class SessionService {
@@ -88,5 +92,37 @@ export class SessionService {
         }
 
         delete session.players[username]
+    }
+
+    async SetNextGameState(sessionName: string): Promise<void> {
+        const currState: SessionState = this.sessions.get(sessionName).state;
+        if (currState === SessionState.START) {
+            this.sessions.get(sessionName).state = SessionState.DELAY;
+            await this.SetNextGameState(currState);
+        } else if (currState === SessionState.TURN) {
+            this.sessions.get(sessionName).state = SessionState.VOTE;
+            await this.iterateStates(currState, VOTE_TIME);
+        } else if (currState === SessionState.VOTE) {
+            this.sessions.get(sessionName).state = SessionState.DELAY;
+            await this.iterateStates(currState, TURN_TIME);
+        } else if (currState === SessionState.DELAY) {
+            this.sessions.get(sessionName).state = SessionState.TURN;
+            await this.iterateStates(currState, DELAY_TIME);
+        } else if (currState === SessionState.FINISH) {
+            return new Promise((resolve): void => {
+                console.log("end")
+                resolve();
+            });
+        }
+    }
+
+    private iterateStates(currState: SessionState ,seconds: number): Promise<void> {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                this.SetNextGameState(currState);
+                console.log(currState)
+                resolve();
+            }, seconds);
+        })
     }
 }
