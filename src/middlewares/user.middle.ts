@@ -9,6 +9,7 @@ export class UserMiddleware implements NestMiddleware {
     private readonly userService: UsersService
   ){}
   use(req: IRequest, res: Response, next: NextFunction) {
+    console.log(req.cookies)
     if(req.cookies && req.cookies['username'])
       req.user = this.userService.getUser(req.cookies['username']);
     next();
