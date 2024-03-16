@@ -1,6 +1,6 @@
 import { Body, Controller, ForbiddenException, Get, Post, Req } from '@nestjs/common';
+import { User } from 'src/entities/session/user.entity';
 import { IRequest } from 'src/interfaces/IRequest';
-import { User } from 'src/schemas/User';
 import { UserCreateDto } from 'src/users/schemas/user.create.data';
 import { UsersService } from 'src/users/services/users/users.service';
 

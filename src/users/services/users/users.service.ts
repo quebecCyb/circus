@@ -1,5 +1,5 @@
 import { ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException, NotImplementedException } from '@nestjs/common';
-import { User } from 'src/schemas/User';
+import { User } from 'src/entities/session/user.entity';
 import { UserCreateData } from 'src/users/schemas/user.create.dto';
 
 
@@ -24,7 +24,7 @@ export class UsersService {
             throw new ForbiddenException('User already exists');
         }
 
-        const newUser: User = new User(nickname); 
+        const newUser: User = new User(nickname, '#fff'); 
         this.users.set(nickname, newUser);
 
         return newUser;

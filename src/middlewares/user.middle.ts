@@ -9,6 +9,7 @@ export class UserMiddleware implements NestMiddleware {
     private readonly userService: UsersService
   ){}
   use(req: IRequest, res: Response, next: NextFunction) {
+    console.log(req.session)
     if(req.session.username)
       req.user = this.userService.getUser(req.session.username);
     next();

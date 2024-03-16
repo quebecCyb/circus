@@ -1,18 +1,18 @@
 export class User {
-  private _login: string
+  private _username: string
   private _color: string
 
-  constructor(login: string, color: string) {
-    this._login = login;
+  constructor(username: string, color: string) {
+    this._username = username;
     this._color = color;
   }
 
-  get login(): string {
-    return this._login;
+  get username(): string {
+    return this._username;
   }
 
-  set login(value: string) {
-    this._login = value;
+  set username(value: string) {
+    this._username = value;
   }
 
   get color(): string {

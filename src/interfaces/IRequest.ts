@@ -1,6 +1,6 @@
 
 import { Request } from 'express'
-import { User } from 'src/schemas/User';
+import { User } from 'src/entities/session/user.entity';
 
 export interface IRequest extends Request{
     lang?: string;
