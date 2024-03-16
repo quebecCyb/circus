@@ -1,5 +1,5 @@
 import { Player } from "./player.entity";
-import { SessionStateEnum } from "../schemas/sessionState.enum";
+import { SessionState } from "../schemas/session.enum";
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { Card } from "./card.entity";
 import {ChatGateway} from "../../chat/chat.gateway";
@@ -12,14 +12,14 @@ export class Session {
   private readonly _uniqueName: string
   private readonly creator: Player
   private players: Player[]
-  private state: SessionStateEnum
+  private state: SessionState
   private currPlayer: number
   private cardsOnTable: Card[]
 
   constructor(uniqueName: string, creator: Player) {
     this._uniqueName = uniqueName;
     this.players = [];
-    this.state = SessionStateEnum.WAITING;
+    this.state = SessionState.WAIT;
     this.currPlayer = 0;
     this.creator = creator;
   }
@@ -36,27 +36,29 @@ export class Session {
   }
 
   startGame(): void {
-    if (SessionStateEnum.STARTED === this.state) {
+    if (SessionState.START === this.state) {
       throw new ForbiddenException('Session is already started');
     }
-    this.state = SessionStateEnum.STARTED;
+    this.state = SessionState.START;
     Session.chatGateway.startGameInRoom(this._uniqueName);
   }
 
   vote(): void {
-    if (SessionStateEnum.WAITING === this.state) {
+    if (SessionState.WAIT === this.state) {
       throw new ForbiddenException('Session is already voting');
     }
-    this.state = SessionStateEnum.WAITING;
+    this.state = SessionState.WAIT;
     Session.chatGateway.voteStart(this._uniqueName);
   }
 
   addPoint(player: Player): void {
     player.incrementScore();
     if (player.totalScore === Session.finalScore) {
-      this.state = SessionStateEnum.FINISHED;
+      this.state = SessionState.FINISH;
       Session.chatGateway.endGame(this._uniqueName, player.username);
     }
+    Session.chatGateway.voteEnded(this._uniqueName, player.username);
+    this.cardsOnTable = [];
   }
 
   addCard(player: Player, card: Card): void {
