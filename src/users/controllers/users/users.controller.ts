@@ -13,11 +13,9 @@ export class UsersController {
     ){}
     
     @Post()
-    addUser(@Req() req: IRequest, @Res({passthrough: true}) res: Response, @Body() body: UserCreateDto){
+    async addUser(@Req() req: IRequest, @Res({passthrough: true}) res: Response, @Body() body: UserCreateDto){
         let user: User = this.userService.createUser(body);
-        req.session.username = user.username
-        res.cookie('username', user.username);
-        return user;
+        return {user, token: await this.userService.generateToken({username: user.username})};
     }
     
     @Get('logged')
