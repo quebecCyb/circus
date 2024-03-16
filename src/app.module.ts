@@ -13,6 +13,7 @@ import { ChatGateway } from './chat/chat.gateway';
 import { SessionModule } from './session/session.module';
 
 import * as cookieParser from 'cookie-parser';
+import { TransformResponseMiddleware } from './middlewares/response.middle';
 
 @Module({
   imports: [
@@ -37,5 +38,6 @@ export class AppModule {
     consumer.apply(cookieParser()).forRoutes('*');
     consumer.apply(FirewallMiddleware).forRoutes('*');
     consumer.apply(UserMiddleware).forRoutes('*');
+    consumer.apply(TransformResponseMiddleware).forRoutes('*');
   }
 }
