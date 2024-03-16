@@ -4,7 +4,7 @@ export class Player extends User {
   private _totalScore: number
   private _cards: Card[]
 
-  constructor(user: User, totalScore: number) {
+  constructor(user: User, totalScore: number = 0) {
     super(user.username, user.color);
     this._totalScore = totalScore;
   }

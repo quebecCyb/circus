@@ -1,4 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Player } from 'src/entities/session/player.entity';
 import { Session } from 'src/entities/session/session.entity';
 import { User } from 'src/entities/session/user.entity';
 import { SessionCreateData } from 'src/session/schemas/session.create.dto';
@@ -27,7 +28,7 @@ export class SessionService {
             throw new ForbiddenException('Session Name already exists');
         }
 
-        const newSession: Session = new Session(name, user.username); 
+        const newSession: Session = new Session(name, new Player(user)); 
         this.sessions.set(name, newSession);
 
         return newSession;
@@ -37,10 +38,12 @@ export class SessionService {
         return Array.from(this.sessions.values()).slice(0, 10);
     }
 
-    getRoomByName(name: string): Session {
+    getSessionByName(name: string): Session {
         if (!this.sessions.has(name)) {
             throw new ForbiddenException('Session does not exist');
         }
         return this.sessions.get(name);
     }
+
+
 }

@@ -66,7 +66,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   addCardToDesk(client: Socket, { room, card, username }: {room: string,
     card: number, username: string}): void {
     this.server.to(room).emit('addCardToDesk', card);
-    this.sessionService.getRoomByName(room).addCardToDesk(card, username);
+    this.sessionService.getSessionByName(room) // .addCardToDesk(card, username);
   }
 
   endGame(room: string, winner: string): void {
