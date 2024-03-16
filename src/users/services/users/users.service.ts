@@ -37,6 +37,7 @@ export class UsersService {
     }
 
     getUser(username: string): User | null {
+        console.log(this.users.has(username))
         if (this.users.has(username)) {
             return null
         }
