@@ -9,23 +9,23 @@ export class Session {
   private static chatGateway: ChatGateway = new ChatGateway();
   private static readonly finalScore: number = 10
   private static readonly maxPlayers: number = 4
-  private readonly _uniqueName: string
+  private readonly _name: string
   private readonly creator: Player
   private players: Player[]
   private state: SessionState
   private currPlayer: number
   private cardsOnTable: Card[]
 
-  constructor(uniqueName: string, creator: Player) {
-    this._uniqueName = uniqueName;
+  constructor(name: string, creator: Player) {
+    this._name = name;
     this.players = [];
     this.state = SessionState.WAIT;
     this.currPlayer = 0;
     this.creator = creator;
   }
 
-  get uniqueName(): string {
-    return this._uniqueName;
+  get name(): string {
+    return this._name;
   }
 
   addPlayer(player: Player): void {
@@ -40,7 +40,7 @@ export class Session {
       throw new ForbiddenException('Session is already started');
     }
     this.state = SessionState.START;
-    Session.chatGateway.startGameInRoom(this._uniqueName);
+    Session.chatGateway.startGameInRoom(this.name);
   }
 
   vote(): void {
@@ -48,22 +48,22 @@ export class Session {
       throw new ForbiddenException('Session is already voting');
     }
     this.state = SessionState.WAIT;
-    Session.chatGateway.voteStart(this._uniqueName);
+    Session.chatGateway.voteStart(this.name);
   }
 
   addPoint(player: Player): void {
     player.incrementScore();
     if (player.totalScore === Session.finalScore) {
       this.state = SessionState.FINISH;
-      Session.chatGateway.endGame(this._uniqueName, player.username);
+      Session.chatGateway.endGame(this.name, player.username);
     }
-    Session.chatGateway.voteEnded(this._uniqueName, player.username);
+    Session.chatGateway.voteEnded(this.name, player.username);
     this.cardsOnTable = [];
   }
 
   addCard(player: Player, card: Card): void {
     player.removeCard(card);
     this.cardsOnTable.push(card);
-    Session.chatGateway.addCardToDesk(this._uniqueName, card.id);
+    Session.chatGateway.addCardToDesk(this.name, card.id);
   }
 }
