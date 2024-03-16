@@ -8,10 +8,13 @@ type FindOption = {
     page?: number
 }
 
+const MAX_PLAYERS = 5;
+
 @Injectable()
 export class SessionService {
 
     private readonly sessions: Map<string, Session> = new Map()
+    private readonly playersToSession: Map<string, string> = new Map()
 
     constructor(){
         
@@ -28,10 +31,25 @@ export class SessionService {
             throw new ForbiddenException('Session Name already exists');
         }
 
-        const newSession: Session = new Session(name, new Player(user)); 
+        const newPlayer: Player = new Player(user)
+        const newSession: Session = new Session(name, newPlayer); 
         this.sessions.set(name, newSession);
 
+        this.addPlayer(newSession, newPlayer)
+
         return newSession;
+    }
+
+    delete(sessionName: string){
+        let session: Session = this.sessions.get(sessionName);
+
+        Object.values(session.players).forEach( (e: Player) => {
+            delete this.playersToSession[e.username]
+        })
+
+        delete this.sessions[sessionName]
+        
+        // Notify players
     }
 
     get({page = 0}: FindOption){
@@ -45,5 +63,25 @@ export class SessionService {
         return this.sessions.get(name);
     }
 
+    addPlayer(session: Session, player: Player): void {
+        if (session.players.values.length >= MAX_PLAYERS) {
+            throw new ForbiddenException('Session is full');
+        }
 
+        if(this.playersToSession.has(player.username)){
+            let session: Session = this.sessions.get(this.playersToSession.get(player.username))
+            this.deletePlayer(session, player.username)
+        }
+
+        session.players.set(player.username, player)
+        this.playersToSession.set(player.username, session.name)
+    }
+
+    deletePlayer(session: Session, username: string): void {
+        delete session.players[username]
+        if(session.owner === username) {
+
+        }
+
+    }
 }
