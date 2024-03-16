@@ -32,10 +32,11 @@ import * as cookieParser from 'cookie-parser';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
+
+    consumer.apply(cookieParser()).forRoutes('*');
     consumer.apply(FirewallMiddleware).forRoutes('*');
     consumer.apply(UserMiddleware).forRoutes('*');
 
-    consumer.apply(cookieParser()).forRoutes('*');
 
   }
 }
