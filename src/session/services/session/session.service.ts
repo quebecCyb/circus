@@ -10,9 +10,11 @@ type FindOption = {
 @Injectable()
 export class SessionService {
 
-    private readonly sessions: Map<string, Session>
+    private readonly sessions: Map<string, Session> = new Map()
 
-    constructor(){}
+    constructor(){
+        
+    }
 
     create(sessionData: SessionCreateData, user: User){
         const name = sessionData.name;
