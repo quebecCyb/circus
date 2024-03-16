@@ -36,7 +36,5 @@ export class AppModule {
     consumer.apply(cookieParser()).forRoutes('*');
     consumer.apply(FirewallMiddleware).forRoutes('*');
     consumer.apply(UserMiddleware).forRoutes('*');
-
-
   }
 }

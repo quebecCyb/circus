@@ -10,18 +10,18 @@ export class Session {
   private static readonly finalScore: number = 10
   private static readonly maxPlayers: number = 4
   private readonly _name: string
-  private readonly creator: Player
+  owner: string
   private players: Player[]
   private state: SessionState
   private currPlayer: number
   private cardsOnTable: Card[]
 
-  constructor(name: string, creator: Player) {
+  constructor(name: string, owner: string) {
     this._name = name;
     this.players = [];
     this.state = SessionState.WAIT;
     this.currPlayer = 0;
-    this.creator = creator;
+    this.owner = owner;
   }
 
   get name(): string {

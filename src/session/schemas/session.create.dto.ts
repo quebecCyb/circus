@@ -1,4 +1,4 @@
 
-export class UserCreateData{
-    username: string;
+export class SessionCreateData{
+    name: string;
 }
