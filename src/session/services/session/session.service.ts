@@ -48,7 +48,7 @@ export class SessionService {
         })
 
         delete this.sessions[sessionName]
-        
+
         // Notify players
     }
 
@@ -64,6 +64,7 @@ export class SessionService {
     }
 
     addPlayer(session: Session, player: Player): void {
+        console.log('player')
         if (session.players.values.length >= MAX_PLAYERS) {
             throw new ForbiddenException('Session is full');
         }
@@ -80,8 +81,7 @@ export class SessionService {
     deletePlayer(session: Session, username: string): void {
         delete session.players[username]
         if(session.owner === username) {
-
+            this.delete(session.name)
         }
-
     }
 }
