@@ -53,7 +53,7 @@ export class SessionService {
 
   nextPlayer(): string {
     this.currPlayer = (this.currPlayer + 1) % this.players.length;
-    return this.players[this.currPlayer].login;
+    return this.players[this.currPlayer].username;
   }
 
   addPoint(player: Player): void {
@@ -67,7 +67,7 @@ export class SessionService {
   playCard(player: Player, card: Card): void {
     player.removeCard(card);
     this.cardsOnTable.push(card);
-    this.server.adapter().rooms.
+    // this.server.adapter().rooms.
   }
 
 
