@@ -7,7 +7,7 @@ import {ChatGateway} from "../../chat/chat.gateway";
 const finalScore: number = 10
 const maxPlayers: number = 4
 const minPlayers: number = 2
-const countOfMemes: number = 20
+const countOfMemes: number = 30
 
 export class Session {
   // private static chatGateway: ChatGateway = new ChatGateway();
