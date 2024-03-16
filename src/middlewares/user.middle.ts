@@ -10,7 +10,6 @@ export class UserMiddleware implements NestMiddleware {
     private readonly userService: UsersService
   ){}
   async use(req: IRequest, res: Response, next: NextFunction) {
-    console.log(req.headers)
     if(req.headers && req.headers['auth']){
       let token: string = req.headers['auth'].toString();
       let user: UserToken | null = await this.userService.verifyToken(token)
