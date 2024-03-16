@@ -1,56 +1,45 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException, NotImplementedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import * as crypto from "crypto";
+import { ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException, NotImplementedException } from '@nestjs/common';
+import { User } from 'src/schemas/User';
 import { UserCreateData } from 'src/users/schemas/user.create.dto';
 
-import * as jwt from 'jsonwebtoken';
-import { UserToken } from 'src/users/schemas/user.token';
 
 @Injectable()
 export class UsersService {
+    private readonly users: Map<string, User> = new Map();
+    
     constructor(
     ){}
 
-    hashPassword(password: string){
-        const hmac = crypto.createHmac('sha256', process.env.PASSWORD_KEY);
-        hmac.update(password);
-      
-        const result = hmac.digest('hex');
-        return result;
+    // hashPassword(password: string){
+    //     const hmac = crypto.createHmac('sha256', process.env.PASSWORD_KEY);
+    //     hmac.update(password);
+    //     const result = hmac.digest('hex');
+    //     return result;
+    // }
+
+    createUser(userData: UserCreateData): User{
+        const nickname = userData.username;
+        
+        if (this.users.has(nickname)) {
+            throw new ForbiddenException('User already exists');
+        }
+
+        const newUser: User = new User(nickname); 
+        this.users.set(nickname, newUser);
+
+        return newUser;
     }
 
-    createToken(user: User): string{
-        throw new NotImplementedException();
+    isLoggedIn(user?: User){
+        if(!user)
+            throw new ForbiddenException('User Is Not Logged In')
+        return user
     }
 
-    async verifyToken(token: string): Promise<UserToken>{
-        return new Promise( (res, rej) => {
-                jwt.verify(token, process.env.JWT_KEY, (error, decodedToken: UserToken) => {
-                    if (error) {
-                        // Token verification failed
-                        console.error('Token verification failed:', error.message);
-                        return rej(new HttpException('You Are Not Logged In', HttpStatus.FORBIDDEN))
-                    } 
-                    return res(decodedToken)
-                })
-            }
-        )
-    }
-
-    async createUser(userData: UserCreateData): Promise<string>{
-        throw new NotImplementedException();
-    }
-
-    async isLoggedIn(token: string){
-        throw new NotImplementedException();
-    }
-
-    async getUser(token: string): Promise<User>{
-        throw new NotImplementedException();
-    }
-
-    save(user: User){
-        throw new NotImplementedException();
+    getUser(username: string): User | null {
+        if (this.users.has(username)) {
+            return null
+        }
+        return this.users.get(username);
     }
 }
