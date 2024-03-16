@@ -16,7 +16,7 @@ export class UsersController {
     addUser(@Req() req: IRequest, @Res({passthrough: true}) res: Response, @Body() body: UserCreateDto){
         let user: User = this.userService.createUser(body);
         req.session.username = user.username
-        res.cookie('username', user.username, { httpOnly: true });
+        res.cookie('username', user.username);
         return user;
     }
     

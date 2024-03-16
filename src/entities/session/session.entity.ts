@@ -13,14 +13,12 @@ export class Session {
   owner: string
   private players: Player[]
   private state: SessionState
-  private currPlayer: number
   private cardsOnTable: Card[]
 
   constructor(name: string, owner: string) {
     this._name = name;
     this.players = [];
     this.state = SessionState.WAIT;
-    this.currPlayer = 0;
     this.owner = owner;
   }
 
@@ -64,6 +62,6 @@ export class Session {
   addCard(player: Player, card: Card): void {
     player.removeCard(card);
     this.cardsOnTable.push(card);
-    Session.chatGateway.addCardToDesk(this.name, card.id);
+    // Session.chatGateway.addCardToDesk(this.name, card.id);
   }
 }
