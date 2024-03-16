@@ -16,6 +16,10 @@ async function bootstrap() {
     }),
   );
 
+  app.enableCors({
+    origin: '*',
+  });
+
   const helpers = {
     hlp: (echo) => `Echo: ${echo}.`,
     json: (text) => JSON.stringify(text),

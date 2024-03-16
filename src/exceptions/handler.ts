@@ -19,6 +19,6 @@ export class CustomExceptionFilter implements ExceptionFilter {
     const message = exception.message || 'Internal Server Error';
 
     // Отправляем ответ с HTML-шаблоном
-    response.status(status).send({});
+    response.status(status).json({status, message, data: {}});
   }
 }

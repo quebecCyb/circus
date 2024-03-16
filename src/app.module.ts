@@ -23,7 +23,7 @@ import { EventsGateway } from './events/events.gateway';
       envFilePath: ['.env'],
       isGlobal: true
     }),
-    TypeOrmModule.forRoot(ormconfig),
+    // TypeOrmModule.forRoot(ormconfig),
     ApiModule, RestModule, UsersModule
   ],
   controllers: [AppController],
