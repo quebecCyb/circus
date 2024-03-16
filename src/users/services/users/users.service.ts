@@ -31,7 +31,6 @@ export class UsersService {
     }
 
     isLoggedIn(user?: User){
-        console.log(user)
         if(!user)
             throw new ForbiddenException('User Is Not Logged In')
         return user

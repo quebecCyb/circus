@@ -1,9 +1,12 @@
-import { Player } from "../../../entities/session/player.entity";
-import { SessionStateEnum } from "../../../entities/schemas/sessionState.enum";
-import { ForbiddenException, Injectable } from "@nestjs/common";
-import { Card } from "../../../entities/session/card.entity";
+import { Injectable } from '@nestjs/common';
+import { Session } from 'src/entities/session/session.entity';
 
 @Injectable()
 export class SessionService {
 
+    private readonly sessions: Map<string, Session>
+
+    constructor(){
+
+    }
 }
