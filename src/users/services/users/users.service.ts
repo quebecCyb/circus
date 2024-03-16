@@ -38,7 +38,7 @@ export class UsersService {
     }
 
     getUser(username: string): User | null {
-        if (this.users.has(username)) {
+        if (!this.users.has(username)) {
             return null
         }
         return this.users.get(username);
