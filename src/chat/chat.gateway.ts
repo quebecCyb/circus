@@ -6,6 +6,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { Card } from "../entities/session/card.entity";
 
 @WebSocketGateway({ namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -13,11 +14,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server: Server;
 
   handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+    console.log(`Client connected: ${client.id} in rooms ${client.rooms}`);
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    console.log(`Client disconnected: ${client.id} in rooms ${client.rooms}`);
   }
 
   @SubscribeMessage('joinRoom')
@@ -35,5 +36,29 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('sendMessage')
   handleMessage(client: Socket, { room, message }: { room: string; message: string }): void {
     this.server.to(room).emit('receiveMessage', message);
+  }
+
+  startGameInRoom(room: string): void {
+    this.server.to(room).emit('gameStarted', true);
+  }
+
+  voteStart(room: string): void {
+    this.server.to(room).emit('voting', true);
+  }
+
+  voteEnded(room: string, winnerOfVote: string): void {
+    this.server.to(room).emit('voting', winnerOfVote);
+  }
+
+  deskErase(room: string): void {
+    this.server.to(room).emit('eraseDesk', true);
+  }
+
+  addCardToDesk(room: string, card: number): void {
+    this.server.to(room).emit('addCardToDesk', card);
+  }
+
+  endGame(room: string, winner: string): void {
+    this.server.to(room).emit('gameEnded', winner);
   }
 }
