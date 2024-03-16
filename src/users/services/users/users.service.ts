@@ -1,7 +1,7 @@
 import { ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException, NotImplementedException } from '@nestjs/common';
 import { User } from 'src/entities/session/user.entity';
 import { UserCreateData } from 'src/users/schemas/user.create.dto';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import { UserToken } from 'src/users/schemas/user.token';
 
 
