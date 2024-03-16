@@ -5,13 +5,12 @@ import { ApiModule } from './api/api.module';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { RestModule } from './rest/rest.module';
 import { FirewallMiddleware } from './middlewares/firewall.middle';
 import { UserMiddleware } from './middlewares/user.middle';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
-import { ormconfig } from './orm.config';
-import { EventsGateway } from './events/events.gateway';
+import { ChatGateway } from './chat/chat.gateway';
+import { SessionModule } from './session/session.module';
 
 @Module({
   imports: [
@@ -24,10 +23,10 @@ import { EventsGateway } from './events/events.gateway';
       isGlobal: true
     }),
     // TypeOrmModule.forRoot(ormconfig),
-    ApiModule, RestModule, UsersModule
+    ApiModule, UsersModule, SessionModule
   ],
   controllers: [AppController],
-  providers: [AppService, EventsGateway],
+  providers: [AppService, ChatGateway, ChatGateway],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
