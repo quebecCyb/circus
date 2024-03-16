@@ -17,11 +17,11 @@ export class Player extends User {
     this._totalScore++;
   }
 
-  addCard(card: Card): void {
-    this._cards.push(card);
+  addCard(card: number): void {
+    this._cards.push(new Card(card));
   }
 
-  removeCard(card: Card): void {
-    this._cards = this._cards.filter(c => c.id !== card.id);
+  removeCard(cardID: number): void {
+    this._cards = this._cards.filter(c => c.id !== cardID);
   }
 }

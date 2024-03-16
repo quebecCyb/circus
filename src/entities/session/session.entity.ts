@@ -9,18 +9,18 @@ export class Session {
   private static chatGateway: ChatGateway = new ChatGateway();
   private static readonly finalScore: number = 10
   private static readonly maxPlayers: number = 4
+  private static readonly minPlayers: number = 2
+  private static readonly countOfMemes: number = 20
   private readonly _name: string
   owner: string
   private players: Player[]
   private state: SessionState
-  private currPlayer: number
   private cardsOnTable: Card[]
 
   constructor(name: string, owner: string) {
     this._name = name;
     this.players = [];
     this.state = SessionState.WAIT;
-    this.currPlayer = 0;
     this.owner = owner;
   }
 
@@ -35,9 +35,15 @@ export class Session {
     this.players.push(player);
   }
 
+  deletePlayer(player: string): void {
+    this.players = this.players.filter(p => p.username !== player);
+  }
+
   startGame(): void {
     if (SessionState.START === this.state) {
       throw new ForbiddenException('Session is already started');
+    } else if (this.players.length < Session.minPlayers) {
+      throw new ForbiddenException('Not enough players');
     }
     this.state = SessionState.START;
     Session.chatGateway.startGameInRoom(this.name);
@@ -61,9 +67,19 @@ export class Session {
     this.cardsOnTable = [];
   }
 
-  addCard(player: Player, card: Card): void {
-    player.removeCard(card);
-    this.cardsOnTable.push(card);
-    Session.chatGateway.addCardToDesk(this.name, card.id);
+  addCardsToPlayers(): void {
+    this.players.forEach(player => {
+      const cardId:number = Math.floor(Math.random() * Session.countOfMemes);
+      player.addCard(cardId);
+      Session.chatGateway.addCardToPlayer(player.username, cardId);
+    })
   }
+
+  addCardToDesk(cardID: number, username: string): void {
+    const player = this.players.find(p => p.username === username);
+    player.removeCard(cardID);
+    this.cardsOnTable.push(new Card(cardID));
+    Session.chatGateway.addCardToPlayer(this.name, cardID);
+  }
+
 }

@@ -34,4 +34,11 @@ export class SessionService {
     get({page = 0}: FindOption){
         return Array.from(this.sessions.values()).slice(0, 10);
     }
+
+    getRoomByName(name: string): Session {
+        if (!this.sessions.has(name)) {
+            throw new ForbiddenException('Session does not exist');
+        }
+        return this.sessions.get(name);
+    }
 }

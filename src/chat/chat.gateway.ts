@@ -6,11 +6,16 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { Inject, Injectable } from "@nestjs/common";
+import { SessionService } from "../session/services/session/session.service";
 
+@Injectable()
 @WebSocketGateway({ namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
+  @Inject()
+  private sessionService: SessionService
 
   handleConnection(client: Socket) {
     console.log(`Client connected: ${client.id} in rooms ${client.rooms}`);
@@ -53,11 +58,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(room).emit('eraseDesk', true);
   }
 
+  addCardToPlayer(player: string, card: number): void {
+    this.server.to(player).emit('addCard', card);
+  }
+
   @SubscribeMessage('addCardToDesk')
   addCardToDesk(client: Socket, { room, card, username }: {room: string,
     card: number, username: string}): void {
     this.server.to(room).emit('addCardToDesk', card);
-    // TODO: execute the logic of removing of card from player's hand
+    this.sessionService.getRoomByName(room).addCardToDesk(card, username);
   }
 
   endGame(room: string, winner: string): void {
