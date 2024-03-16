@@ -1,6 +1,8 @@
 import { ForbiddenException, HttpException, HttpStatus, Injectable, NotFoundException, NotImplementedException } from '@nestjs/common';
 import { User } from 'src/entities/session/user.entity';
 import { UserCreateData } from 'src/users/schemas/user.create.dto';
+import * as jwt from 'jsonwebtoken';
+import { UserToken } from 'src/users/schemas/user.token';
 
 
 @Injectable()
@@ -16,6 +18,32 @@ export class UsersService {
     //     const result = hmac.digest('hex');
     //     return result;
     // }
+
+    generateToken(payload: UserToken, secret=process.env.SECRET, options= { expiresIn: '1d' }){
+        // Асинхронная функция для создания токена
+        return new Promise((resolve, reject) => {
+            jwt.sign(payload, secret, options, (err, token) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(token);
+            }
+            });
+        });
+    }
+
+    verifyToken(token: string, secret=process.env.SECRET, options= { expiresIn: '1d' }): Promise<UserToken | null> {
+        return new Promise((resolve, reject) => {
+            jwt.verify(token, secret, options, (err, decoded: UserToken) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(decoded);
+                }
+            });
+        });
+    }
+  
 
     createUser(userData: UserCreateData): User{
         const nickname = userData.username;
