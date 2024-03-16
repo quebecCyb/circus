@@ -12,7 +12,7 @@ export class SessionController {
 
     @Post()
     addSession(@Req() req: IRequest, @Body() body: SessionCreateDto){
-        this.sessionService.create(body, req.user)
+        return this.sessionService.create(body, req.user)
     }
 
 
