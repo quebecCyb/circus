@@ -3,6 +3,7 @@ import { Card } from "./card.entity";
 export class Player extends User {
   private _totalScore: number
   private _cards: Card[]
+  private voteScore: number
 
   constructor(user: User, totalScore: number = 0) {
     super(user.username, user.color);
