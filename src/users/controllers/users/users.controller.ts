@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, Get, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { User } from 'src/entities/session/user.entity';
 import { IRequest } from 'src/interfaces/IRequest';
@@ -14,7 +14,7 @@ export class UsersController {
     
     @Post()
     async addUser(@Req() req: IRequest, @Res({passthrough: true}) res: Response, @Body() body: UserCreateDto){
-        let user: User = this.userService.createUser(body);
+        const user: User = this.userService.createUser(body);
         return {user, token: await this.userService.generateToken({username: user.username})};
     }
     
