@@ -1,4 +1,4 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { ForbiddenException, Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { IRequest } from 'src/interfaces/IRequest';
 import { UserToken } from 'src/users/schemas/user.token';
@@ -13,6 +13,8 @@ export class UserMiddleware implements NestMiddleware {
     if(req.headers && req.headers['auth']){
       let token: string = req.headers['auth'].toString();
       let user: UserToken | null = await this.userService.verifyToken(token)
+      if(!user)
+        throw new ForbiddenException();
       req.user = this.userService.getUser(user.username);
     }
     
