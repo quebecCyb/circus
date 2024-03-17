@@ -5,9 +5,17 @@ import * as exphbs from 'express-handlebars';
 import { join } from 'path';
 import { CustomExceptionFilter } from './exceptions/handler';
 import * as session from 'express-session';
+import { ChatGateway } from './chat/chat.gateway';
+import { SessionService } from './session/services/session/session.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+
+  const chatGateway = app.get(ChatGateway);
+  const sessionService = app.get(SessionService);
+  sessionService.setGateway(chatGateway);
+
   app.use(
     session({
       secret: process.env.SESSION_SECRET,

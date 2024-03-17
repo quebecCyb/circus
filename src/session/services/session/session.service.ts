@@ -28,13 +28,13 @@ export class SessionService {
 
     private readonly sessions: Map<string, Session> = new Map()
     private readonly playersToSession: Map<string, string> = new Map()
+    
+    private chatGateway: ChatGateway;
 
-    constructor(
-      private chatGateway: ChatGateway
-    ){
-        
+    setGateway(gateway: ChatGateway) {
+      this.chatGateway = gateway;
     }
-
+        
     create(sessionData: SessionCreateData, user: User){
         const name = sessionData.name;
         
