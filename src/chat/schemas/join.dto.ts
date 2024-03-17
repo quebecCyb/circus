@@ -1,5 +1,4 @@
 
-class JoinDto{
-    token: string;
-    room: string;
+export class JoinDto{
+    session: string;
 }

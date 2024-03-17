@@ -1,0 +1,20 @@
+{
+  "name": "chat-client",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A chat client using socket.io-client to connect to a WebSocket server",
+  "main": "chatClient.js",
+  "scripts": {
+    "start": "node chatClient.js"
+  },
+  "keywords": [
+    "chat",
+    "socket.io",
+    "client"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io-client": "^4.0.0"
+  }
+}

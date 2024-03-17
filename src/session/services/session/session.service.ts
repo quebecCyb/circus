@@ -31,13 +31,17 @@ export class SessionService {
             throw new ForbiddenException('Session Name already exists');
         }
 
-        const newPlayer: Player = new Player(user)
+        const newPlayer: Player = this.createPlayer(user)
         const newSession: Session = new Session(name, newPlayer); 
         this.sessions.set(name, newSession);
 
         this.addPlayer(name, newPlayer)
 
         return newSession;
+    }
+
+    createPlayer(user: User){
+        return new Player(user)
     }
 
     delete(sessionName: string){
@@ -50,6 +54,14 @@ export class SessionService {
         this.sessions.delete(sessionName)
 
         // Notify players
+
+    }
+
+    getSessionByPlayer(username: string){
+        let sessionName = this.playersToSession.get(username)
+        if(!Object.keys(this.sessions.get(sessionName).players).includes(username))
+            throw new ForbiddenException('Player is not allowed to connect to this room!');
+        return sessionName
     }
 
     get({page = 0}: FindOption){
