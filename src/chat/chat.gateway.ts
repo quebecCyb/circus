@@ -13,6 +13,7 @@ import { JoinDto } from './schemas/join.dto';
 import { UsersService } from 'src/users/services/users/users.service';
 import { UserToken } from 'src/users/schemas/user.token';
 import { Session } from 'src/entities/session/session.entity';
+import { CLIENT_ROUTE, SERVER_ROUTE } from 'src/entities/schemas/socket.routes';
 
 @Injectable()
 @WebSocketGateway({ namespace: '/chat' })

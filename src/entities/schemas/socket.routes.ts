@@ -1,5 +1,5 @@
 
-const CLIENT_ROUTE = { // client to server
+export const CLIENT_ROUTE = { // client to server
     JOIN: 'joinRoom',
     START: 'start',
     LEFT: 'leaveRoom',
@@ -10,7 +10,7 @@ const CLIENT_ROUTE = { // client to server
 }
 
 
-const SERVER_ROUTE = { // server to client
+export const SERVER_ROUTE = { // server to client
     JOIN: 'joined',
     STARTED: 'start',
     LEFT: 'left',
