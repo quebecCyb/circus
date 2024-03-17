@@ -103,11 +103,11 @@ export class SessionService {
         delete session.players[username]
     }
 
-    SetNextGameState(sessionName: string): Promise<void> {
+    async setNextGameState(sessionName: string): Promise<void> {
         const currState: SessionState = this.sessions.get(sessionName).state;
         if (currState === SessionState.START) {
             this.sessions.get(sessionName).state = SessionState.DELAY;
-            await this.SetNextGameState(currState);
+            await this.setNextGameState(currState);
         } else if (currState === SessionState.TURN) {
             this.sessions.get(sessionName).state = SessionState.VOTE;
             await this.iterateStates(currState, 1500);
@@ -128,7 +128,7 @@ export class SessionService {
     private iterateStates(currState: SessionState ,seconds: number): Promise<void> {
         return new Promise((resolve) => {
             setTimeout(() => {
-                this.SetNextGameState(currState);
+                this.setNextGameState(currState);
                 console.log(currState)
                 resolve();
             }, seconds);
