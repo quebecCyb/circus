@@ -75,6 +75,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(CLIENT_ROUTE.START)
   async handleStartGame(client: Socket) {
     let username: string = this.chatService.getUsername(client)
+    console.log('USERNAME TO START: ' + username)
     let sessionName: string = this.sessionService.getSessionByPlayer(username)
 
     let session: Session = this.sessionService.getSessionByName(sessionName);
