@@ -92,6 +92,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('STARTED')
 
     this.notify(session.name, SERVER_ROUTE.STARTED, {})
+    this.sessionService.start(sessionName);
 
   }
 
@@ -124,7 +125,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     let session: Session = this.sessionService.getSessionByName(sessionName)
     Object.keys(session.players).forEach(player => {
       let socket = this.chatService.getSocket(player);
-      this.server.to(socket.id).emit(emit, data)
+      this.server.to(socket.id).emit(emit, da)
     });
     // this.server.to(session).emit(emit, data);
   }
