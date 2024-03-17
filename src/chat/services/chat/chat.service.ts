@@ -19,4 +19,10 @@ export class ChatService {
     this.usernameToSocket.delete(username);
   }
 
+  getSocket(username: string): Socket {
+    if (!this.usernameToSocket.has(username)) {
+      throw new ConflictException(`User with name ${username} is not connected`);
+    }
+    return this.usernameToSocket.get(username);
+  }
 }
