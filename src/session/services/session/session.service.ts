@@ -10,6 +10,9 @@ type FindOption = {
 }
 
 const MAX_PLAYERS = 5;
+const VOTE_TIME = 15000;
+const TURN_TIME = 10000;
+const DELAY_TIME = 5000;
 
 @Injectable()
 export class SessionService {
@@ -17,7 +20,9 @@ export class SessionService {
     private readonly sessions: Map<string, Session> = new Map()
     private readonly playersToSession: Map<string, string> = new Map()
 
-    constructor(){
+    constructor(
+      private chatService: ChatService
+    ){
         
     }
 
@@ -46,7 +51,7 @@ export class SessionService {
     }
 
     delete(sessionName: string){
-        let session: Session = this.sessions.get(sessionName);
+        const session: Session = this.sessions.get(sessionName);
 
         Object.values(session.players).forEach( (e: Player) => {
             this.playersToSession.delete(e.username)
@@ -77,14 +82,14 @@ export class SessionService {
     }
 
     addPlayer(sessionName: string, player: Player): void {
-        let session = this.sessions.get(sessionName)
+        const session = this.sessions.get(sessionName)
         if (Object.keys(session.players).length >= MAX_PLAYERS) {
             throw new ForbiddenException('Session is full');
         }
 
         if(this.playersToSession.has(player.username)){
             console.log('Player username delete: ' + player.username)
-            let session: Session = this.sessions.get(this.playersToSession.get(player.username))
+            const session: Session = this.sessions.get(this.playersToSession.get(player.username))
             this.deletePlayer(session.name, player.username)
         }
 
@@ -94,7 +99,7 @@ export class SessionService {
     }
 
     deletePlayer(sessionName: string, username: string): void {
-        let session: Session = this.sessions.get(sessionName)
+        const session: Session = this.sessions.get(sessionName)
 
         if(session.owner === username) {
             this.delete(session.name)
@@ -103,23 +108,62 @@ export class SessionService {
         delete session.players[username]
     }
 
+    private notifyPlayers(session: Session, emit: string, data?: string): void {
+        Object.values(session.players).forEach( (player: Player) => {
+            const socket = this.chatService.getSocket(player.username);
+            socket.emit(emit, (data! ? true : data));
+        })
+    }
+
+    startGame(sessionName: string): void {
+        const session: Session = this.sessions.get(sessionName)
+        this.notifyPlayers(session, 'gameStarted');
+        session.startGame();
+    }
+
+    delayGame(sessionName: string): void {
+        const session: Session = this.sessions.get(sessionName)
+        this.notifyPlayers(session, 'delayGame');
+    }
+
+    voteStart(sessionName: string): void {
+        const session: Session = this.sessions.get(sessionName)
+        this.notifyPlayers(session, 'voting');
+    }
+
+    voteEnded(sessionName: string, winnerOfVote: string): void {
+        const session: Session = this.sessions.get(sessionName)
+        this.notifyPlayers(session, 'voteEnded', winnerOfVote);
+    }
+
+    gameEnded(sessionName: string): void {
+        const session: Session = this.sessions.get(sessionName)
+        this.notifyPlayers(session, 'gameEnded', "winner");
+        // TODO: Add winner logic
+    }
+
     async setNextGameState(sessionName: string): Promise<void> {
         const currState: SessionState = this.sessions.get(sessionName).state;
         if (currState === SessionState.START) {
             this.sessions.get(sessionName).state = SessionState.DELAY;
+            this.startGame(sessionName);
             await this.setNextGameState(currState);
         } else if (currState === SessionState.TURN) {
             this.sessions.get(sessionName).state = SessionState.VOTE;
-            await this.iterateStates(currState, 1500);
+            this.voteStart(sessionName);
+            await this.iterateStates(currState, VOTE_TIME);
         } else if (currState === SessionState.VOTE) {
             this.sessions.get(sessionName).state = SessionState.DELAY;
-            await this.iterateStates(currState, 1000);
+            this.voteEnded(sessionName, "winner");
+            // TODO: Add winner logic
+            await this.iterateStates(currState, TURN_TIME);
         } else if (currState === SessionState.DELAY) {
             this.sessions.get(sessionName).state = SessionState.TURN;
-            await this.iterateStates(currState, 500);
+            // TODO: Add giving of card logic
+            await this.iterateStates(currState, DELAY_TIME);
         } else if (currState === SessionState.FINISH) {
             return new Promise((resolve): void => {
-                console.log("end")
+                this.gameEnded(sessionName);
                 resolve();
             });
         }

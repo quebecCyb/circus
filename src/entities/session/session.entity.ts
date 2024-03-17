@@ -49,9 +49,7 @@ export class Session {
     } else if (Object.values(this.players).length < minPlayers) {
       throw new ForbiddenException('Not enough players');
     }
-
     // ChangeState()
-    this.state = SessionState.START;
     // Session.chatGateway.startGameInRoom(this.name);
   }
 
