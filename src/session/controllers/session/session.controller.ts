@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Param, ParseIntPipe, Post, Put, Req } from '@nestjs/common';
 import { IRequest } from 'src/interfaces/IRequest';
 import { SessionCreateDto } from 'src/session/schemas/session.create.data';
 import { SessionService } from 'src/session/services/session/session.service';
@@ -28,6 +28,8 @@ export class SessionController {
 
     @Post(':name')
     joinSession(@Req() req: IRequest, @Param('name') name: string){
+        if(!req.user)
+            throw new ForbiddenException('You are not logged in');
         let player = this.sessionService.createPlayer(req.user)
         return this.sessionService.addPlayer(name, player);
     }
