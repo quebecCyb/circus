@@ -9,15 +9,21 @@ export class ChatService {
   connect(username: string, socketUser: Socket): void {
     this.usernameToSocket.set(username, socketUser);
     this.socketIdToUsername.set(socketUser.id, username);
+
+    this.logUsers()
   }
 
   disconnect(socketUser: Socket): void {
-    this.usernameToSocket.delete(this.socketIdToUsername.get(socketUser.id));
-    this.socketIdToUsername.delete(socketUser.id);
+    // this.usernameToSocket.delete(this.socketIdToUsername.get(socketUser.id));
+    // this.socketIdToUsername.delete(socketUser.id);
+  }
+
+  logUsers(){
+    console.log(Object.keys(this.socketIdToUsername))
   }
 
   getUsername(socket: Socket){
-    console.log(Object.keys(this.socketIdToUsername))
+    this.logUsers()
     return this.socketIdToUsername.get(socket.id);
   }
 
