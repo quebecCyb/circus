@@ -78,6 +78,7 @@ export class SessionService {
         console.log(username)
         const sessionName = this.playersToSession.get(username)
         console.log(sessionName)
+        console.log(JSON.stringify(this.sessions))
 
         if(!Object.keys(this.sessions.get(sessionName).players).includes(username))
             throw new ForbiddenException('Player is not allowed to connect to this room!');
