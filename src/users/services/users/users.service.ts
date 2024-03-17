@@ -37,7 +37,7 @@ export class UsersService {
         return new Promise((resolve, reject) => {
             jwt.verify(token, secret, options, (err, decoded: UserToken) => {
                 if (err || !this.users.has(decoded.username)) {
-                    reject(err);
+                    resolve(null);
                 } else {
                     resolve(decoded);
                 }
