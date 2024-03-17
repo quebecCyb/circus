@@ -4,20 +4,20 @@ import { Socket } from "socket.io";
 @Injectable()
 export class ChatService {
   private readonly usernameToSocket: Map<string, Socket> = new Map();
-  private readonly socketidToUsername: Map<string, string> = new Map();
+  private readonly socketIdToUsername: Map<string, string> = new Map();
 
   connect(username: string, socketUser: Socket): void {
     this.usernameToSocket.set(username, socketUser);
-    this.socketidToUsername.set(socketUser.id, username);
+    this.socketIdToUsername.set(socketUser.id, username);
   }
 
   disconnect(socketUser: Socket): void {
-    this.usernameToSocket.delete(this.socketidToUsername.get(socketUser.id));
-    this.socketidToUsername.delete(socketUser.id);
+    this.usernameToSocket.delete(this.socketIdToUsername.get(socketUser.id));
+    this.socketIdToUsername.delete(socketUser.id);
   }
 
   getUsername(socket: Socket){
-    return this.socketidToUsername.get(socket.id);
+    return this.socketIdToUsername.get(socket.id);
   }
 
   getSocket(username: string): Socket {

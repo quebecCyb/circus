@@ -36,7 +36,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if(!token){
         throw new ForbiddenException('U are not logged in!')
       }
-      let userToken: UserToken = await this.userService.verifyToken(token.toString());
+      const userToken: UserToken = await this.userService.verifyToken(token.toString());
       console.log(`Client connected: ${client.id} | ${userToken.username} `);
       this.chatService.connect(userToken.username, client)
     }catch(e){
@@ -78,7 +78,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('leaveRoom')
   handleLeaveRoom(client: Socket, data: {session: string}): void {
-    let username: string = this.chatService.getUsername(client)
+    const username: string = this.chatService.getUsername(client)
     client.leave(data.session);
     this.server.to(data.session).emit('left', {username});
     this.sessionService.deletePlayer(data.session, username)
@@ -95,6 +95,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('vote')
   vote(client: Socket, { session, target }: { session: string; target: string }): void {
     let username: string = this.chatService.getUsername(client)
+    
     this.server.to(session).emit('voted', {username, target});
   }
 

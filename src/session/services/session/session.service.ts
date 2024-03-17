@@ -4,8 +4,8 @@ import { Session } from 'src/entities/session/session.entity';
 import { User } from 'src/entities/session/user.entity';
 import { SessionCreateData } from 'src/session/schemas/session.create.dto';
 import { SessionState } from "../../../entities/schemas/session.enum";
-import { ChatService } from 'src/chat/services/chat/chat.service';
 import { ChatGateway } from 'src/chat/chat.gateway';
+import { ChatService } from "../../../chat/services/chat/chat.service";
 
 type FindOption = {
     page?: number
@@ -82,7 +82,7 @@ export class SessionService {
     }
 
     getSessionByPlayer(username: string){
-        let sessionName = this.playersToSession.get(username)
+        const sessionName = this.playersToSession.get(username)
         if(!Object.keys(this.sessions.get(sessionName).players).includes(username))
             throw new ForbiddenException('Player is not allowed to connect to this room!');
         return sessionName

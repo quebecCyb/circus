@@ -4,10 +4,10 @@ import { ForbiddenException } from "@nestjs/common";
 import { Card } from "./card.entity";
 import {ChatGateway} from "../../chat/chat.gateway";
 
-const finalScore: number = 10
-const maxPlayers: number = 4
-const minPlayers: number = 2
-const countOfMemes: number = 30
+const finalScore = 10
+const maxPlayers = 4
+const minPlayers  = 2
+const countOfMemes = 30
 
 interface PlayerDictionary {
   [key: string]: Player;
@@ -19,46 +19,14 @@ export class Session {
   readonly name: string;
   readonly owner: string;
   readonly players: PlayerDictionary = {}
-  state: SessionState; 
-
+  state: SessionState;
+  readonly usernameToScore: Map<string, number> = new Map();
+  usernameToPointsInVote: Map<string, number> = new Map();
 
   constructor(name: string, owner: Player) {
     this.name = name;
     this.owner = owner.username;
     this.state = SessionState.WAIT;
   }
-
-  // vote(): void {
-  //   if (SessionState.WAIT === this.state) {
-  //     throw new ForbiddenException('Session is already voting');
-  //   }
-  //   this.state = SessionState.WAIT;
-  //   Session.chatGateway.voteStart(this.name);
-  // }
-
-  // addPoint(player: Player): void {
-  //   player.incrementScore();
-  //   if (player.totalScore === Session.finalScore) {
-  //     this.state = SessionState.FINISH;
-  //     Session.chatGateway.endGame(this.name, player.username);
-  //   }
-  //   Session.chatGateway.voteEnded(this.name, player.username);
-  //   this.cardsOnTable = [];
-  // }
-
-  // addCardsToPlayers(): void {
-  //   this.players.forEach(player => {
-  //     const cardId:number = Math.floor(Math.random() * Session.countOfMemes);
-  //     player.addCard(cardId);
-  //     Session.chatGateway.addCardToPlayer(player.username, cardId);
-  //   })
-  // }
-
-  // addCardToDesk(cardID: number, username: string): void {
-  //   const player = this.players.find(p => p.username === username);
-  //   player.removeCard(cardID);
-  //   this.cardsOnTable.push(new Card(cardID));
-  //   Session.chatGateway.addCardToPlayer(this.name, cardID);
-  // }
 
 }
