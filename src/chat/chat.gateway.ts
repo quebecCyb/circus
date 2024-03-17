@@ -56,6 +56,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(CLIENT_ROUTE.JOIN)
   async handleJoinRoom(client: Socket,  data: {session: string}) {
     let username: string = this.chatService.getUsername(client)
+    console.log('Join room:' + username)
+
     if(this.sessionService.getSessionByPlayer(username) !== data.session){
       throw new ForbiddenException('You are not allowed to join this room (incorrect session name)')
     }
