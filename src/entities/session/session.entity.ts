@@ -87,6 +87,11 @@ export class Session {
     }
   }
 
+  getWinner(): string {
+    return Array.from(this.usernameToScore.keys())
+      .find(username => this.usernameToScore.get(username) === finalScore);
+  }
+
   // vote(): void {
   //   if (SessionState.WAIT === this.state) {
   //     throw new ForbiddenException('Session is already voting');

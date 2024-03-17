@@ -139,8 +139,7 @@ export class SessionService {
 
     gameEnded(sessionName: string): void {
         const session: Session = this.sessions.get(sessionName)
-        this.notifyPlayers(session, 'gameEnded', "winner");
-        // TODO: Add winner logic
+        this.notifyPlayers(session, 'gameEnded', session.getWinner());
     }
 
     async setNextGameState(sessionName: string): Promise<void> {
@@ -148,20 +147,19 @@ export class SessionService {
         if (currState === SessionState.START) {
             this.sessions.get(sessionName).state = SessionState.DELAY;
             this.startGame(sessionName);
-            await this.setNextGameState(currState);
+            await this.setNextGameState(sessionName);
         } else if (currState === SessionState.TURN) {
             this.sessions.get(sessionName).state = SessionState.VOTE;
             this.voteStart(sessionName);
-            await this.iterateStates(currState, VOTE_TIME);
+            await this.iterateStates(sessionName, VOTE_TIME);
         } else if (currState === SessionState.VOTE) {
             this.sessions.get(sessionName).state = SessionState.DELAY;
-            this.voteEnded(sessionName, "winner");
-            // TODO: Add winner logic
-            await this.iterateStates(currState, TURN_TIME);
+            this.voteEnded(sessionName, this.sessions.get(sessionName).getBestInVote());
+            await this.iterateStates(sessionName, TURN_TIME);
         } else if (currState === SessionState.DELAY) {
             this.sessions.get(sessionName).state = SessionState.TURN;
             // TODO: Add giving of card logic
-            await this.iterateStates(currState, DELAY_TIME);
+            await this.iterateStates(sessionName, DELAY_TIME);
         } else if (currState === SessionState.FINISH) {
             return new Promise((resolve): void => {
                 this.gameEnded(sessionName);
@@ -170,11 +168,11 @@ export class SessionService {
         }
     }
 
-    private iterateStates(currState: SessionState ,seconds: number): Promise<void> {
+    private iterateStates(state: string, seconds: number): Promise<void> {
         return new Promise((resolve) => {
             setTimeout(() => {
-                this.setNextGameState(currState);
-                console.log(currState)
+                this.setNextGameState(state);
+                console.log(this.sessions.get(state).state)
                 resolve();
             }, seconds);
         })
