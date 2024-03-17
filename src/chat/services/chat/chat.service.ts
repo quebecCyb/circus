@@ -3,27 +3,39 @@ import { Socket } from "socket.io";
 
 @Injectable()
 export class ChatService {
-  private readonly usernameToSocket: Map<string, Socket> = new Map();
-  private readonly socketIdToUsername: Map<string, string> = new Map();
+  private usernameToSocket: Map<string, Socket>;
+  private socketIdToUsername: Map<string, string>;
+
+  constructor() {
+    this.usernameToSocket = new Map();
+    this.socketIdToUsername = new Map();
+  }
 
   connect(username: string, socketUser: Socket): void {
+    console.log(`Connecting: ${username} with socket ID ${socketUser.id}`);
     this.usernameToSocket.set(username, socketUser);
     this.socketIdToUsername.set(socketUser.id, username);
 
-    this.logUsers()
+    this.logUsers();
   }
 
   disconnect(socketUser: Socket): void {
-    // this.usernameToSocket.delete(this.socketIdToUsername.get(socketUser.id));
-    // this.socketIdToUsername.delete(socketUser.id);
+    const username = this.socketIdToUsername.get(socketUser.id);
+    if (username) {
+      console.log(`Disconnecting: ${username}`);
+      // this.usernameToSocket.delete(username);
+      // this.socketIdToUsername.delete(socketUser.id);
+    }
+
+    this.logUsers();
   }
 
-  logUsers(){
-    console.log(Object.keys(this.socketIdToUsername))
+  logUsers() {
+    console.log(`Current users: ${Array.from(this.socketIdToUsername.values())}`);
   }
 
-  getUsername(socket: Socket){
-    this.logUsers()
+  getUsername(socket: Socket): string {
+    this.logUsers();
     return this.socketIdToUsername.get(socket.id);
   }
 
@@ -33,5 +45,4 @@ export class ChatService {
     }
     return this.usernameToSocket.get(username);
   }
-
 }
