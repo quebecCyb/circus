@@ -115,6 +115,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   notify(session: string, emit: string, data: any) {
+    console.log('Sent: ' + session + ' - ' + emit)
     this.server.to(session).emit(emit, data);
   }
 
