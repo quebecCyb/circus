@@ -17,7 +17,6 @@ export class ChatService {
   }
 
   getUsername(socket: Socket){
-    console.log(socket)
     return this.socketIdToUsername.get(socket.id);
   }
 
