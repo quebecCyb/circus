@@ -20,8 +20,6 @@ export class Session {
   readonly owner: string;
   readonly players: PlayerDictionary = {}
   state: SessionState;
-  readonly usernameToScore: Map<string, number> = new Map();
-  usernameToPointsInVote: Map<string, number> = new Map();
 
   constructor(name: string, owner: Player) {
     this.name = name;
