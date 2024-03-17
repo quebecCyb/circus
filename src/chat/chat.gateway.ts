@@ -39,7 +39,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
       const userToken: UserToken = await this.userService.verifyToken(token.toString());
       if(!userToken)
-        throw new ForbiddenException('');
+        throw new ForbiddenException('User Token');
       console.log(`Client connected: ${client.id} | ${userToken.username} `);
       this.chatService.connect(userToken.username, client)
     }catch(e){
