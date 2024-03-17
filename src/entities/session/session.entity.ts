@@ -4,10 +4,10 @@ import { ForbiddenException } from "@nestjs/common";
 import { Card } from "./card.entity";
 import {ChatGateway} from "../../chat/chat.gateway";
 
-const finalScore: number = 10
-const maxPlayers: number = 4
-const minPlayers: number = 2
-const countOfMemes: number = 30
+const finalScore = 10
+const maxPlayers = 4
+const minPlayers  = 2
+const countOfMemes = 30
 
 interface PlayerDictionary {
   [key: string]: Player;
@@ -19,8 +19,9 @@ export class Session {
   readonly name: string;
   readonly owner: string;
   readonly players: PlayerDictionary = {}
-  state: SessionState; 
-
+  state: SessionState;
+  readonly usernameToScore: Map<string, number> = new Map();
+  usernameToPointsInVote: Map<string, number> = new Map();
 
   constructor(name: string, owner: Player) {
     this.name = name;
@@ -51,6 +52,39 @@ export class Session {
     }
     // ChangeState()
     // Session.chatGateway.startGameInRoom(this.name);
+  }
+
+  addVotePointToPlayer(username: string): void {
+    if (this.usernameToPointsInVote.has(username)) {
+      this.usernameToPointsInVote.set(username, this.usernameToPointsInVote.get(username) + 1);
+    } else {
+      this.usernameToPointsInVote.set(username, 1);
+    }
+  }
+
+  getBestInVote(): string {
+    let bestPlayer: string[];
+    let maxPoints = 0;
+    for (const [username, points] of this.usernameToPointsInVote) {
+      if (points > maxPoints) {
+        maxPoints = points;
+        bestPlayer = [username];
+      } else if (points === maxPoints) {
+        bestPlayer.push(username);
+      }
+    }
+    return bestPlayer.at(Math.floor(Math.random() * bestPlayer.length));
+  }
+
+  addScorePointToPlayer(username: string): void {
+    if (this.usernameToScore.has(username)) {
+      this.usernameToScore.set(username, this.usernameToScore.get(username) + 1);
+      if (this.usernameToScore.get(username) === finalScore) {
+        this.state = SessionState.FINISH;
+      }
+    } else {
+      this.usernameToScore.set(username, 1);
+    }
   }
 
   // vote(): void {

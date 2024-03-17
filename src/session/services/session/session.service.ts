@@ -4,6 +4,7 @@ import { Session } from 'src/entities/session/session.entity';
 import { User } from 'src/entities/session/user.entity';
 import { SessionCreateData } from 'src/session/schemas/session.create.dto';
 import { SessionState } from "../../../entities/schemas/session.enum";
+import { ChatService } from "../../../chat/services/chat/chat.service";
 
 type FindOption = {
     page?: number
@@ -132,7 +133,7 @@ export class SessionService {
     }
 
     voteEnded(sessionName: string, winnerOfVote: string): void {
-        const session: Session = this.sessions.get(sessionName)
+        const session: Session = this.sessions.get(sessionName);
         this.notifyPlayers(session, 'voteEnded', winnerOfVote);
     }
 

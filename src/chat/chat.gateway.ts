@@ -35,7 +35,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if(!token){
         throw new ForbiddenException('U are not logged in!')
       }
-      let userToken: UserToken = await this.userService.verifyToken(token.toString());
+      const userToken: UserToken = await this.userService.verifyToken(token.toString());
       console.log(`Client connected: ${client.id} | ${userToken.username} `);
       this.chatService.connect(userToken.username, client)
     }catch(e){
@@ -50,27 +50,33 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('joinRoom')
   async handleJoinRoom(client: Socket,  data: {session: string}) {
-    let username: string = this.chatService.getUsername(client)
+    const username: string = this.chatService.getUsername(client)
     if(this.sessionService.getSessionByPlayer(username) !== data.session){
       throw new ForbiddenException('You are not allowed to join this room (incorrect session name)')
     }
-
+    
     client.join(data.session);
     this.server.to(data.session).emit('joined', username);
   }
 
   @SubscribeMessage('leaveRoom')
   handleLeaveRoom(client: Socket, data: {session: string}): void {
-    let username: string = this.chatService.getUsername(client)
+    const username: string = this.chatService.getUsername(client)
     client.leave(data.session);
     this.server.to(data.session).emit('left', {username});
   }
 
   @SubscribeMessage('sendMessage')
   handleMessage(client: Socket, { session, message }: { session: string; message: string }): void {
-    let username: string = this.chatService.getUsername(client)
+    const username: string = this.chatService.getUsername(client)
 
     this.server.to(session).emit('receiveMessage', {username, message});
+  }
+
+  @SubscribeMessage('vote')
+  userVote(client: Socket, { sessionName, voteFor }: { sessionName: string; voteFor: string }): void {
+    const session = this.sessionService.getSessionByName(sessionName);
+    session.addVotePointToPlayer(voteFor);
   }
 
   sendNotificationToRoom(room: string, message: string) {
