@@ -27,24 +27,28 @@ class ChatClient {
         console.log(`New message: ${message.message}`);
         });
 
-        this.socket.on('gameStarted', () => {
-        console.log('Game started');
+        this.socket.on('start', () => {
+            console.log('Game started');
+        });
+
+        this.socket.on('turn', () => {
+            console.log('turn');
         });
 
         this.socket.on('voting', (data) => {
-        console.log(`Voting update: ${data}`);
+            console.log(`Voting update: ${data}`);
         });
 
         this.socket.on('eraseDesk', () => {
-        console.log('Desk erased');
+            console.log('Desk erased');
         });
 
         this.socket.on('addCard', (card) => {
-        console.log(`Received card: ${card}`);
+            console.log(`Received card: ${card}`);
         });
 
-        this.socket.on('gameEnded', (winner) => {
-        console.log(`Game ended. Winner: ${winner}`);
+        this.socket.on('finish', (winner) => {
+            console.log(`Game ended. Winner: ${winner}`);
         });
     }
 
@@ -60,14 +64,21 @@ class ChatClient {
         this.socket.emit('sendMessage', { session, message });
     }
 
-    addCardToDesk(room, card, username) {
-        this.socket.emit('addCardToDesk', { room, card, username });
+    start() {
+        this.socket.emit('start');
     }
 }
 
-let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZDMiLCJpYXQiOjE3MTA2MzMyOTUsImV4cCI6MTcxMDcxOTY5NX0.tYi4rN5zaTipfg-PaU-YaJGT725NK6dGi4uFuumU7C0'
+let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZDIiLCJpYXQiOjE3MTA2NTIyNjksImV4cCI6MTcxMDczODY2OX0.3oyU9nMArKTjpIUb7d37OyebG__0PYmG99NG98PNkrs'
 
 // Example usage
 const chatClient = new ChatClient('http://localhost:4100', 'chat', token);
 chatClient.joinRoom('test');
 chatClient.sendMessage('test', 'YA PRISORdeed');
+
+
+// setTimeout(() => {
+//     console.log('START')
+//     chatClient.start()
+// }, 20000)
+

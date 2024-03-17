@@ -22,9 +22,7 @@ export class Session {
   readonly players: PlayerDictionary = {}
 
   readonly votes: Map<string, string> = new Map();
-
-
-
+  
   state: SessionState;
 
   constructor(name: string, owner: Player) {

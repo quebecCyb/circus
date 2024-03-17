@@ -1,8 +1,8 @@
 import { User } from './user.entity';
 import { Card } from "./card.entity";
 export class Player extends User {
-  private totalScore: number
-  private card: string
+  totalScore: number
+  card: string = null;
 
   constructor(user: User, totalScore: number = 0) {
     super(user.username, user.color);

@@ -6,12 +6,14 @@ import { SessionCreateData } from 'src/session/schemas/session.create.dto';
 import { SessionState } from "../../../entities/schemas/session.enum";
 import { ChatGateway } from 'src/chat/chat.gateway';
 import { ChatService } from "../../../chat/services/chat/chat.service";
+import { TopicPicker } from 'src/services/topicPicker';
 
 type FindOption = {
     page?: number
 }
 
 const MAX_PLAYERS = 5;
+const MAX_SCORE = 5;
 
 const NEXT_STATE = {
     [SessionState.VOTE]: SessionState.TURN,
@@ -132,20 +134,25 @@ export class SessionService {
             let winner: string = session.discardVotes()
 
             // Игроки победили?
-            if(winner) // WIN
-            {
-                this.notify(session.name, 'finish', {winner});
-                return
+            if(Object.keys(session.players).includes(winner)){
+                session.players[winner].incrementScore();
+                if(session.players[winner].totalScore >= MAX_SCORE) // WIN
+                {
+                    this.notify(session.name, 'finish', {winner});
+                    return
+                }
             }
+            this.notify(session.name, 'turn', {winner, topic: (new TopicPicker()).getRandomTopic()});
         }else if(state === SessionState.VOTE){
             // ...
+            this.notify(session.name, 'vote', {});
         }else if(state === SessionState.DELAY){
             // ...
         }
 
         session.state = state
 
-        this.notify(session.name, 'state', state);
+        // this.notify(session.name, state, state);
         this.iterateStates(session, NEXT_STATE[state], DELAY_STATE[state])
     }
 
