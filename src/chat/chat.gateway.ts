@@ -49,7 +49,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.chatService.disconnect(client)
   }
 
-  @SubscribeMessage('joinRoom')
+  @SubscribeMessage(CLIENT_ROUTE.JOIN)
   async handleJoinRoom(client: Socket,  data: {session: string}) {
     let username: string = this.chatService.getUsername(client)
     if(this.sessionService.getSessionByPlayer(username) !== data.session){
@@ -57,14 +57,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     client.join(data.session);
-    this.server.to(data.session).emit('joined', username);
+    this.server.to(data.session).emit(SERVER_ROUTE.JOIN, username);
   }
 
 
-  @SubscribeMessage('start')
-  async handleStartGame(client: Socket,  data: {session: string}) {
+  @SubscribeMessage(CLIENT_ROUTE.LEFT)
+  handleLeaveRoom(client: Socket): void {
+    const username: string = this.chatService.getUsername(client)
+    let session: string = this.sessionService.getSessionByPlayer(username);
+
+    client.leave(session);
+    this.server.to(session).emit(SERVER_ROUTE.LEFT, {username});
+    this.sessionService.deletePlayer(session, username)
+  }
+
+  @SubscribeMessage(CLIENT_ROUTE.START)
+  async handleStartGame(client: Socket) {
     let username: string = this.chatService.getUsername(client)
     let sessionName: string = this.sessionService.getSessionByPlayer(username)
+
     let session: Session = this.sessionService.getSessionByName(sessionName);
     if(session.owner !== username){
       throw new ForbiddenException('You are not allowed to start the game')
@@ -73,70 +84,41 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     this.sessionService.start(sessionName);
-    // this.server.to(data.session).emit('started', username);
+    this.server.to(session.name).emit(SERVER_ROUTE.STARTED);
   }
 
-  @SubscribeMessage('leaveRoom')
-  handleLeaveRoom(client: Socket, data: {session: string}): void {
-    const username: string = this.chatService.getUsername(client)
-    client.leave(data.session);
-    this.server.to(data.session).emit('left', {username});
-    this.sessionService.deletePlayer(data.session, username)
-  }
-
-  @SubscribeMessage('sendMessage')
-  handleMessage(client: Socket, { session, message }: { session: string; message: string }): void {
+  @SubscribeMessage(CLIENT_ROUTE.VOTE)
+  vote(client: Socket, { target }: { target: string }): void {
     let username: string = this.chatService.getUsername(client)
+    let session: string = this.sessionService.getSessionByPlayer(username);
 
-    this.server.to(session).emit('receiveMessage', {username, message});
-  }
-
-
-  @SubscribeMessage('vote')
-  vote(client: Socket, { session, target }: { session: string; target: string }): void {
-    let username: string = this.chatService.getUsername(client)
+    // VOTE ACTION
+    this.sessionService.vote(username, target);
     
-    this.server.to(session).emit('voted', {username, target});
+    this.server.to(session).emit('voted', {target});
   }
 
-  @SubscribeMessage('play')
-  play(client: Socket, { session, cardId }: { session: string; cardId: string }): void {
+  @SubscribeMessage(CLIENT_ROUTE.PLAY)
+  play(client: Socket, { card }: { card: string }): void {
     let username: string = this.chatService.getUsername(client)
-    this.server.to(session).emit('played', {username, cardId});
+    let session: string = this.sessionService.getSessionByPlayer(username);
+
+    // PLAY ACTION
+    this.sessionService.play(username, card);
+
+    this.server.to(session).emit('played', {username, card});
   }
 
   notify(session: string, emit: string, data: any) {
     this.server.to(session).emit(emit, data);
   }
 
-  startGameInRoom(room: string): void {
-    this.server.to(room).emit('gameSta', true);
-  }
 
-  voteStart(room: string): void {
-    this.server.to(room).emit('voting', true);
-  }
+  @SubscribeMessage(CLIENT_ROUTE.MSG)
+  handleMessage(client: Socket, { message }: { message: string }): void {
+    let username: string = this.chatService.getUsername(client)
+    let session: string = this.sessionService.getSessionByPlayer(username);
 
-  voteEnded(room: string, winnerOfVote: string): void {
-    this.server.to(room).emit('voting', winnerOfVote);
-  }
-
-  deskErase(room: string): void {
-    this.server.to(room).emit('eraseDesk', true);
-  }
-
-  addCardToPlayer(player: string, card: number): void {
-    this.server.to(player).emit('addCard', card);
-  }
-
-  @SubscribeMessage('addCardToDesk')
-  addCardToDesk(client: Socket, { room, card, username }: {room: string,
-    card: number, username: string}): void {
-    this.server.to(room).emit('addCardToDesk', card);
-    this.sessionService.getSessionByName(room) // .addCardToDesk(card, username);
-  }
-
-  endGame(room: string, winner: string): void {
-    this.server.to(room).emit('gameEnded', winner);
+    this.server.to(session).emit(SERVER_ROUTE.MSG, {username, message});
   }
 }

@@ -3,6 +3,7 @@ import { User } from 'src/entities/session/user.entity';
 import { UserCreateData } from 'src/users/schemas/user.create.dto';
 import * as jwt from 'jsonwebtoken';
 import { UserToken } from 'src/users/schemas/user.token';
+import { ColorPicker } from 'src/services/colorPicker';
 
 
 @Injectable()
@@ -52,7 +53,7 @@ export class UsersService {
             throw new ForbiddenException('User already exists');
         }
 
-        const newUser: User = new User(nickname, '#fff'); 
+        const newUser: User = new User(nickname, (new ColorPicker()).getRandomColor()); 
         this.users.set(nickname, newUser);
 
         return newUser;

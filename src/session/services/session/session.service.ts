@@ -12,14 +12,6 @@ type FindOption = {
 }
 
 const MAX_PLAYERS = 5;
-const VOTE_TIME = 15000;
-const TURN_TIME = 10000;
-const DELAY_TIME = 5000;
-
-
-let DELAY = {
-
-}
 
 const NEXT_STATE = {
     [SessionState.VOTE]: SessionState.TURN,
@@ -38,7 +30,6 @@ export class SessionService {
     private readonly playersToSession: Map<string, string> = new Map()
 
     constructor(
-      private chatService: ChatService,
       private chatGateway: ChatGateway
     ){
         
@@ -78,7 +69,7 @@ export class SessionService {
         this.sessions.delete(sessionName)
 
         // Notify players
-
+        
     }
 
     getSessionByPlayer(username: string){
@@ -134,16 +125,18 @@ export class SessionService {
 
     changeState(session: Session, state: SessionState){
         if(state === SessionState.TURN){
+            session.round++;
+            Object.values(session.players).forEach( (e: Player) => {
+                e.setCard(null);
+            })
+            let winner: string = session.discardVotes()
+
             // Игроки победили?
-            if(false)// WIN
+            if(winner) // WIN
             {
+                this.notify(session.name, 'finish', {winner});
                 return
             }
-
-            // Игроки тянут карты
-            // Object.values(session.players).forEach((player: Player) => {
-            //     player
-            // });
         }else if(state === SessionState.VOTE){
             // ...
         }else if(state === SessionState.DELAY){
@@ -154,6 +147,18 @@ export class SessionService {
 
         this.notify(session.name, 'state', state);
         this.iterateStates(session, NEXT_STATE[state], DELAY_STATE[state])
+    }
+
+    play(username, card){
+        let sessionName: string = this.playersToSession.get(username);
+        let session: Session = this.sessions.get(sessionName);
+        session.players[username].setCard(card)
+    }
+
+    vote(username, target){
+        let sessionName: string = this.playersToSession.get(username);
+        let session: Session = this.sessions.get(sessionName);
+        session.vote(username, target)
     }
 
     start(sessionName: string): void {

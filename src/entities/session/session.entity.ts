@@ -17,16 +17,55 @@ export class Session {
   // private static chatGateway: ChatGateway = new ChatGateway();
 
   readonly name: string;
+  round: number = 0;
   readonly owner: string;
   readonly players: PlayerDictionary = {}
+
+  readonly votes: Map<string, string> = new Map();
+
+
+
   state: SessionState;
   readonly usernameToScore: Map<string, number> = new Map();
   usernameToPointsInVote: Map<string, number> = new Map();
 
   constructor(name: string, owner: Player) {
+    this.round++;
     this.name = name;
     this.owner = owner.username;
     this.state = SessionState.WAIT;
   }
 
+
+  discardVotes(): string {
+    // Подсчет голосов для каждого игрока
+    const voteCounts = new Map<string, number>();
+    let maxVotes = 0;
+    let winner: string | null = null;
+  
+    this.votes.forEach((value) => {
+      const count = voteCounts.get(value) || 0;
+      voteCounts.set(value, count + 1);
+      
+      if (count + 1 > maxVotes) {
+        maxVotes = count + 1;
+        winner = value;
+      }
+    });
+  
+    // Обнуляем votes map
+    this.votes.clear();
+  
+    // Возвращаем имя победителя
+    return winner || null;
+  }
+
+  vote(voterUsername: string, targetUsername: string): boolean {
+    // Проверяем, что пользователь не голосует за себя и еще не голосовал
+    if (voterUsername !== targetUsername && !this.votes.has(voterUsername)) {
+      this.votes.set(voterUsername, targetUsername);
+      return true;  // Голосование успешно
+    }
+    return false;  // Голосование не удалось
+  }
 }
