@@ -62,8 +62,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       throw new ForbiddenException('You are not allowed to join this room (incorrect session name)')
     }
 
-    client.join(data.session);
-    this.server.to(data.session).emit(SERVER_ROUTE.JOIN, username);
+    this.notify(data.session, SERVER_ROUTE.JOIN, username)
   }
 
 
@@ -73,7 +72,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     let session: string = this.sessionService.getSessionByPlayer(username);
 
     client.leave(session);
-    this.server.to(session).emit(SERVER_ROUTE.LEFT, {username});
+
+    this.notify(session, SERVER_ROUTE.LEFT, {username})
     this.sessionService.deletePlayer(session, username)
   }
 
@@ -91,8 +91,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     console.log('STARTED')
 
-    this.sessionService.start(sessionName);
-    this.server.to(session.name).emit(SERVER_ROUTE.STARTED);
+    this.notify(session.name, SERVER_ROUTE.STARTED, {})
+
   }
 
   @SubscribeMessage(CLIENT_ROUTE.VOTE)
@@ -103,7 +103,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // VOTE ACTION
     this.sessionService.vote(username, target);
     
-    this.server.to(session).emit('voted', {target});
+    // this.server.to(session).emit(, {target});
+    this.notify(session, 'voted', {target})
+
   }
 
   @SubscribeMessage(CLIENT_ROUTE.PLAY)
@@ -114,12 +116,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // PLAY ACTION
     this.sessionService.play(username, card);
 
-    this.server.to(session).emit('played', {username, card});
+    this.notify(session, 'played', {username, card})
   }
 
-  notify(session: string, emit: string, data: any) {
-    console.log('Sent: ' + session + ' - ' + emit)
-    this.server.to(session).emit(emit, data);
+  notify(sessionName: string, emit: string, data: any) {
+    console.log('Sent: ' + sessionName + ' - ' + emit)
+    let session: Session = this.sessionService.getSessionByName(sessionName)
+    Object.keys(session.players).forEach(player => {
+      let socket = this.chatService.getSocket(player);
+      this.server.to(socket.id).emit(emit, data)
+    });
+    // this.server.to(session).emit(emit, data);
   }
 
 
@@ -128,6 +135,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     let username: string = this.chatService.getUsername(client)
     let session: string = this.sessionService.getSessionByPlayer(username);
 
-    this.server.to(session).emit(SERVER_ROUTE.MSG, {username, message});
+    this.notify(session, SERVER_ROUTE.MSG, {username, message})
+
   }
 }
