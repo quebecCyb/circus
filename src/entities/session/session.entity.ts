@@ -24,33 +24,8 @@ export class Session {
 
   constructor(name: string, owner: Player) {
     this.name = name;
-
-
     this.owner = owner.username;
-    // this.addPlayer(owner)
-
     this.state = SessionState.WAIT;
-  }
-
-  // addPlayer(player: Player): void {
-  //   if (this.players.values.length >= Session.maxPlayers) {
-  //     throw new ForbiddenException('Session is full');
-  //   }
-  //   this.players.set(player.username, player)
-  // }
-
-  // deletePlayer(username: string): void {
-  //   delete this.players[username]
-  // }
-
-  startGame(): void {
-    if (SessionState.START === this.state) {
-      throw new ForbiddenException('Session is already started');
-    } else if (Object.values(this.players).length < minPlayers) {
-      throw new ForbiddenException('Not enough players');
-    }
-    // ChangeState()
-    // Session.chatGateway.startGameInRoom(this.name);
   }
 
   // vote(): void {

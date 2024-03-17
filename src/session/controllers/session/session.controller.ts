@@ -15,7 +15,6 @@ export class SessionController {
         return this.sessionService.create(body, req.user)
     }
 
-
     @Get()
     getSessions(){
         return this.sessionService.get({});

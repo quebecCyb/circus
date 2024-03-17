@@ -1,9 +1,11 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Player } from 'src/entities/session/player.entity';
 import { Session } from 'src/entities/session/session.entity';
 import { User } from 'src/entities/session/user.entity';
 import { SessionCreateData } from 'src/session/schemas/session.create.dto';
 import { SessionState } from "../../../entities/schemas/session.enum";
+import { ChatService } from 'src/chat/services/chat/chat.service';
+import { ChatGateway } from 'src/chat/chat.gateway';
 
 type FindOption = {
     page?: number
@@ -14,6 +16,21 @@ const VOTE_TIME = 15000;
 const TURN_TIME = 10000;
 const DELAY_TIME = 5000;
 
+
+let DELAY = {
+
+}
+
+const NEXT_STATE = {
+    [SessionState.VOTE]: SessionState.TURN,
+    [SessionState.TURN]: SessionState.VOTE,
+}
+
+const DELAY_STATE = {
+    [SessionState.VOTE]: 5000,
+    [SessionState.TURN]: 10000,
+}
+
 @Injectable()
 export class SessionService {
 
@@ -21,7 +38,8 @@ export class SessionService {
     private readonly playersToSession: Map<string, string> = new Map()
 
     constructor(
-      private chatService: ChatService
+      private chatService: ChatService,
+      private chatGateway: ChatGateway
     ){
         
     }
@@ -83,6 +101,8 @@ export class SessionService {
 
     addPlayer(sessionName: string, player: Player): void {
         const session = this.sessions.get(sessionName)
+        if(!session)
+            throw new NotFoundException('Session is not found!')
         if (Object.keys(session.players).length >= MAX_PLAYERS) {
             throw new ForbiddenException('Session is full');
         }
@@ -108,72 +128,49 @@ export class SessionService {
         delete session.players[username]
     }
 
-    private notifyPlayers(session: Session, emit: string, data?: string): void {
-        Object.values(session.players).forEach( (player: Player) => {
-            const socket = this.chatService.getSocket(player.username);
-            socket.emit(emit, (data! ? true : data));
-        })
+    notify(sessionName: string, emit: string, data?: any): void {
+        this.chatGateway.notify(sessionName, emit, data)
     }
 
-    startGame(sessionName: string): void {
-        const session: Session = this.sessions.get(sessionName)
-        this.notifyPlayers(session, 'gameStarted');
-        session.startGame();
-    }
+    changeState(session: Session, state: SessionState){
+        if(state === SessionState.TURN){
+            // Игроки победили?
+            if(false)// WIN
+            {
+                return
+            }
 
-    delayGame(sessionName: string): void {
-        const session: Session = this.sessions.get(sessionName)
-        this.notifyPlayers(session, 'delayGame');
-    }
-
-    voteStart(sessionName: string): void {
-        const session: Session = this.sessions.get(sessionName)
-        this.notifyPlayers(session, 'voting');
-    }
-
-    voteEnded(sessionName: string, winnerOfVote: string): void {
-        const session: Session = this.sessions.get(sessionName)
-        this.notifyPlayers(session, 'voteEnded', winnerOfVote);
-    }
-
-    gameEnded(sessionName: string): void {
-        const session: Session = this.sessions.get(sessionName)
-        this.notifyPlayers(session, 'gameEnded', "winner");
-        // TODO: Add winner logic
-    }
-
-    async setNextGameState(sessionName: string): Promise<void> {
-        const currState: SessionState = this.sessions.get(sessionName).state;
-        if (currState === SessionState.START) {
-            this.sessions.get(sessionName).state = SessionState.DELAY;
-            this.startGame(sessionName);
-            await this.setNextGameState(currState);
-        } else if (currState === SessionState.TURN) {
-            this.sessions.get(sessionName).state = SessionState.VOTE;
-            this.voteStart(sessionName);
-            await this.iterateStates(currState, VOTE_TIME);
-        } else if (currState === SessionState.VOTE) {
-            this.sessions.get(sessionName).state = SessionState.DELAY;
-            this.voteEnded(sessionName, "winner");
-            // TODO: Add winner logic
-            await this.iterateStates(currState, TURN_TIME);
-        } else if (currState === SessionState.DELAY) {
-            this.sessions.get(sessionName).state = SessionState.TURN;
-            // TODO: Add giving of card logic
-            await this.iterateStates(currState, DELAY_TIME);
-        } else if (currState === SessionState.FINISH) {
-            return new Promise((resolve): void => {
-                this.gameEnded(sessionName);
-                resolve();
-            });
+            // Игроки тянут карты
+            // Object.values(session.players).forEach((player: Player) => {
+            //     player
+            // });
+        }else if(state === SessionState.VOTE){
+            // ...
+        }else if(state === SessionState.DELAY){
+            // ...
         }
+
+        session.state = state
+
+        this.notify(session.name, 'state', state);
+        this.iterateStates(session, NEXT_STATE[state], DELAY_STATE[state])
     }
 
-    private iterateStates(currState: SessionState ,seconds: number): Promise<void> {
+    start(sessionName: string): void {
+        const session: Session = this.sessions.get(sessionName)
+        this.notify(session.name, 'started');
+        this.changeState(session, SessionState.TURN)
+    }
+
+    finish(sessionName: string): void {
+        const session: Session = this.sessions.get(sessionName)
+        this.notify(session.name, 'finished');
+    }
+
+    private iterateStates(session: Session, currState: SessionState ,seconds: number): Promise<void> {
         return new Promise((resolve) => {
             setTimeout(() => {
-                this.setNextGameState(currState);
-                console.log(currState)
+                this.changeState(session, currState);
                 resolve();
             }, seconds);
         })

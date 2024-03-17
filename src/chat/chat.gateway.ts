@@ -12,6 +12,7 @@ import { ChatService } from './services/chat/chat.service';
 import { JoinDto } from './schemas/join.dto';
 import { UsersService } from 'src/users/services/users/users.service';
 import { UserToken } from 'src/users/schemas/user.token';
+import { Session } from 'src/entities/session/session.entity';
 
 @Injectable()
 @WebSocketGateway({ namespace: '/chat' })
@@ -59,11 +60,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(data.session).emit('joined', username);
   }
 
+
+  @SubscribeMessage('start')
+  async handleStartGame(client: Socket,  data: {session: string}) {
+    let username: string = this.chatService.getUsername(client)
+    let sessionName: string = this.sessionService.getSessionByPlayer(username)
+    let session: Session = this.sessionService.getSessionByName(sessionName);
+    if(session.owner !== username){
+      throw new ForbiddenException('You are not allowed to start the game')
+    }else if(Object.values(session.players).length < 2){
+      throw new ForbiddenException('Not enough players')
+    }
+
+    this.sessionService.start(sessionName);
+    // this.server.to(data.session).emit('started', username);
+  }
+
   @SubscribeMessage('leaveRoom')
   handleLeaveRoom(client: Socket, data: {session: string}): void {
     let username: string = this.chatService.getUsername(client)
     client.leave(data.session);
     this.server.to(data.session).emit('left', {username});
+    this.sessionService.deletePlayer(data.session, username)
   }
 
   @SubscribeMessage('sendMessage')
@@ -73,8 +91,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(session).emit('receiveMessage', {username, message});
   }
 
-  sendNotificationToRoom(room: string, message: string) {
-    this.server.to(room).emit('notification', message);
+
+  @SubscribeMessage('vote')
+  vote(client: Socket, { session, target }: { session: string; target: string }): void {
+    let username: string = this.chatService.getUsername(client)
+    this.server.to(session).emit('voted', {username, target});
+  }
+
+  @SubscribeMessage('play')
+  play(client: Socket, { session, cardId }: { session: string; cardId: string }): void {
+    let username: string = this.chatService.getUsername(client)
+    this.server.to(session).emit('played', {username, cardId});
+  }
+
+  notify(session: string, emit: string, data: any) {
+    this.server.to(session).emit(emit, data);
   }
 
   startGameInRoom(room: string): void {
