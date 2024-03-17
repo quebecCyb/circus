@@ -26,8 +26,6 @@ export class Session {
 
 
   state: SessionState;
-  readonly usernameToScore: Map<string, number> = new Map();
-  usernameToPointsInVote: Map<string, number> = new Map();
 
   constructor(name: string, owner: Player) {
     this.round++;

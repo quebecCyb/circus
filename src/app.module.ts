@@ -7,17 +7,17 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { FirewallMiddleware } from './middlewares/firewall.middle';
 import { UserMiddleware } from './middlewares/user.middle';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { ChatGateway } from './chat/chat.gateway';
 import { SessionModule } from './session/session.module';
-
 import * as cookieParser from 'cookie-parser';
 import { TransformResponseMiddleware } from './middlewares/response.middle';
 import { ChatService } from './chat/services/chat/chat.service';
+import { StaticModule } from "./static/static.module";
 
 @Module({
   imports: [
+    StaticModule,
     SessionModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'static'),
