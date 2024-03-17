@@ -4,7 +4,6 @@ import { SessionService } from './services/session/session.service';
 import { ChatGateway } from 'src/chat/chat.gateway';
 
 @Module({
-  imports: [ChatGateway],
   controllers: [SessionController],
   providers: [SessionService],
   exports: [SessionService]
