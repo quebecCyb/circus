@@ -16,39 +16,31 @@ class ChatClient {
         });
 
         this.socket.on('joined', (username) => {
-            console.log(`Joined room ${username}`);
+            console.log(`join: ${username}`.JSON);
         });
 
         this.socket.on('left', (username) => {
-            console.log(`Left room ${username}`);
-        });
-
-        this.socket.on('receiveMessage', (message) => {
-        console.log(`New message: ${message.message}`);
+            console.log(`left: ${username}`.JSON);
         });
 
         this.socket.on('start', () => {
-            console.log('Game started');
+            console.log('start');
         });
 
         this.socket.on('turn', () => {
             console.log('turn');
         });
 
-        this.socket.on('voting', (data) => {
-            console.log(`Voting update: ${data}`);
-        });
-
-        this.socket.on('eraseDesk', () => {
-            console.log('Desk erased');
+        this.socket.on('vote', (data) => {
+            console.log(`vote: ${data}`.JSON);
         });
 
         this.socket.on('addCard', (card) => {
-            console.log(`Received card: ${card}`);
+            console.log(`card: ${card}`.JSON);
         });
 
         this.socket.on('finish', (winner) => {
-            console.log(`Game ended. Winner: ${winner}`);
+            console.log(`winner: ${winner}`.JSON);
         });
     }
 
@@ -57,15 +49,23 @@ class ChatClient {
     }
 
     leaveRoom(session) {
-        this.socket.emit('leaveRoom', session);
+        this.socket.emit('leaveRoom', { session });
     }
 
     sendMessage(session, message) {
         this.socket.emit('sendMessage', { session, message });
     }
 
-    start() {
-        this.socket.emit('start');
+    start(session) {
+        this.socket.emit('start', { session });
+    }
+
+    play(username, card) {
+        this.socket.emit('play', { username, card });
+    }
+
+    vote(username, usernameFor) {
+        this.socket.emit('vote', { username, usernameFor });
     }
 }
 
