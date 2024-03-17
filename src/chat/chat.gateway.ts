@@ -32,6 +32,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleConnection(client: Socket) {
     try{
       const token = client.handshake.query.token;
+      if(!token){
+        throw new ForbiddenException('U are not logged in!')
+      }
       let userToken: UserToken = await this.userService.verifyToken(token.toString());
       console.log(`Client connected: ${client.id} | ${userToken.username} `);
       this.chatService.connect(userToken.username, client)
