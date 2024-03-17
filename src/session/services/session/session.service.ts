@@ -4,7 +4,6 @@ import { Session } from 'src/entities/session/session.entity';
 import { User } from 'src/entities/session/user.entity';
 import { SessionCreateData } from 'src/session/schemas/session.create.dto';
 import { SessionState } from "../../../entities/schemas/session.enum";
-import { ChatService } from "../../../chat/services/chat/chat.service";
 
 type FindOption = {
     page?: number
@@ -38,13 +37,17 @@ export class SessionService {
             throw new ForbiddenException('Session Name already exists');
         }
 
-        const newPlayer: Player = new Player(user)
+        const newPlayer: Player = this.createPlayer(user)
         const newSession: Session = new Session(name, newPlayer); 
         this.sessions.set(name, newSession);
 
         this.addPlayer(name, newPlayer)
 
         return newSession;
+    }
+
+    createPlayer(user: User){
+        return new Player(user)
     }
 
     delete(sessionName: string){
@@ -57,6 +60,14 @@ export class SessionService {
         this.sessions.delete(sessionName)
 
         // Notify players
+
+    }
+
+    getSessionByPlayer(username: string){
+        let sessionName = this.playersToSession.get(username)
+        if(!Object.keys(this.sessions.get(sessionName).players).includes(username))
+            throw new ForbiddenException('Player is not allowed to connect to this room!');
+        return sessionName
     }
 
     get({page = 0}: FindOption){
@@ -96,14 +107,14 @@ export class SessionService {
 
         delete session.players[username]
     }
-    
+
     private notifyPlayers(session: Session, emit: string, data?: string): void {
         Object.values(session.players).forEach( (player: Player) => {
             const socket = this.chatService.getSocket(player.username);
             socket.emit(emit, (data! ? true : data));
         })
     }
-    
+
     startGame(sessionName: string): void {
         const session: Session = this.sessions.get(sessionName)
         this.notifyPlayers(session, 'gameStarted');
@@ -130,7 +141,7 @@ export class SessionService {
         this.notifyPlayers(session, 'gameEnded', "winner");
         // TODO: Add winner logic
     }
-    
+
     async setNextGameState(sessionName: string): Promise<void> {
         const currState: SessionState = this.sessions.get(sessionName).state;
         if (currState === SessionState.START) {

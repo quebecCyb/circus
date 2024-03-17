@@ -35,7 +35,7 @@ export class UsersService {
     verifyToken(token: string, secret=process.env.SECRET, options= { expiresIn: '1d' }): Promise<UserToken | null> {
         return new Promise((resolve, reject) => {
             jwt.verify(token, secret, options, (err, decoded: UserToken) => {
-                if (err) {
+                if (err || !this.users.has(decoded.username)) {
                     reject(err);
                 } else {
                     resolve(decoded);
