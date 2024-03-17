@@ -42,7 +42,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         throw new ForbiddenException('User Token');
       console.log(`Client connected: ${client.id} | ${userToken.username} `);
       this.chatService.connect(userToken.username, client)
-      
+
     }catch(e){
       console.error(e)
     }
@@ -86,6 +86,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }else if(Object.values(session.players).length < 2){
       throw new ForbiddenException('Not enough players')
     }
+    console.log('STARTED')
 
     this.sessionService.start(sessionName);
     this.server.to(session.name).emit(SERVER_ROUTE.STARTED);

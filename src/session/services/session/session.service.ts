@@ -130,6 +130,7 @@ export class SessionService {
     }
 
     changeState(session: Session, state: SessionState){
+        console.log('CHANGE STATE')
         if(state === SessionState.TURN){
             session.round++;
             Object.values(session.players).forEach( (e: Player) => {
@@ -146,6 +147,7 @@ export class SessionService {
                     return
                 }
             }
+            console.log('turn')
             this.notify(session.name, 'turn', {winner, topic: (new TopicPicker()).getRandomTopic()});
         }else if(state === SessionState.VOTE){
             // ...
@@ -174,7 +176,8 @@ export class SessionService {
 
     start(sessionName: string): void {
         const session: Session = this.sessions.get(sessionName)
-        this.notify(session.name, 'started');
+
+        this.notify(session.name, 'start');
         this.changeState(session, SessionState.TURN)
     }
 
